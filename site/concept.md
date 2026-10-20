@@ -37,7 +37,7 @@ Rejected: a setup video: passive, dates fast, and every peer with a video shows 
 Product: lfr, an MIT-licensed single Go binary: SMTP, list websites, outbound queue and a CLI with skills for agents.
 Price: free and open source; the reader pays only a VPS (about $4–6 a month) and a relay's cents per thousand mails.
 Delivery: an install script that downloads the release for Linux or macOS, then `lfr setup`; skills install with `lfr skills install`.
-Open: Is the repository public at github.com/Anonyfox/lfr with a first release before the page goes live?
+Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux and macOS builds and checksums.
 
 ## Facts
 - DigitalOcean blocks outbound SMTP port 25 for new accounts, and support will not make an exception. V041 V087
