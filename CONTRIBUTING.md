@@ -34,3 +34,24 @@ done
 ```
 
 A failure writes its input to `testdata/fuzz/FuzzXxx/`: fix the root cause and commit the file.
+
+## Releasing
+
+Update the version where docs name it, then tag from a green `main`:
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+The release workflow runs the tests, publishes `lfr_<os>_<arch>.tar.gz` for Linux and macOS (amd64,
+arm64) with `checksums.txt`, and checks that the binary reports the tag. `install.sh` downloads the
+latest release and verifies it against `checksums.txt`, so the repository must be public for the install
+command to work for anyone else. `goreleaser release --snapshot --clean` builds the same archives
+locally.
+
+## The website
+
+`site/` is an [lfm](https://lfm.cash) project, deployed to GitHub Pages by the pages workflow on every
+change under `site/`. `lfm compile site` builds it, `lfm compile --release site` also checks it in a
+browser. `SKILL.md` and `install.sh` are served at the site root from `site/assets/agents/`, together
+with `llms.txt`; copy the root files there when they change (a test fails until they match).

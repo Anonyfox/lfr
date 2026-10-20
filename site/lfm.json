@@ -11,8 +11,6 @@
   "urls": {
     "repo": "https://github.com/Anonyfox/lfr",
     "releases": "https://github.com/Anonyfox/lfr/releases",
-    "skill": "https://lfr.email/SKILL.md",
-    "llms": "https://lfr.email/llms.txt",
     "operations": "https://github.com/Anonyfox/lfr/blob/main/docs/operations.md",
     "license": "https://github.com/Anonyfox/lfr/blob/main/LICENSE",
     "gmailRules": "https://support.google.com/a/answer/81126",
@@ -61,6 +59,13 @@
     "browserData": [
       "data.bill",
       "data.example"
-    ]
+    ],
+    "assets": {
+      "overrides": {
+        "assets/agents/SKILL.md": "file",
+        "assets/agents/install.sh": "file",
+        "assets/agents/llms.txt": "file"
+      }
+    }
   }
 }

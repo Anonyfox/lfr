@@ -13,6 +13,7 @@
 <meta property="og:image" content="{{.socialImage.src}}">
 <meta property="og:image:alt" content="{{.socialImage.alt}}">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="text/markdown" title="Instructions for agents" href="assets/agents/SKILL.md">
 {{style "assets/styles/main.css"}}
 </head>
 <body>
@@ -129,22 +130,23 @@
   <p>lfr comes with skills that teach an agent the whole job, from DNS to the welcome mail to the replies.</p>
   <p>Every command prints the next step, and <code>lfr check</code> won't let a draft out that breaks your newsletter's own brief.</p>
   <p>Paste this into Claude Code, Codex or whatever agent you run:</p>
-  <pre class="prompt" id="prompt">Set up lfr (https://lfr.email) for <span class="d">example.com</span> on my server.
+  <pre class="prompt" id="prompt">Set up lfr (https://lfr.email/SKILL.md) for <span class="d">example.com</span> on my server.
 1. On the server: curl -fsSL https://lfr.email/install.sh | sudo sh
    then: sudo lfr setup --hostname mail.<span class="d">example.com</span> --systemd
 2. Run lfr skills install, read the lfr-setup skill and follow it:
    add <span class="d">example.com</span>, give me the DNS records to publish,
-   set up a relay if port 25 is blocked, run lfr doctor until it is clean.
+   set up a relay if port 25 is blocked,
+   and run lfr doctor until it is clean.
 3. Then start the newsletter: lfr init newsletter --list <span class="slug">news</span>
    and follow lfr check, step by step.
 Ask me before anything that costs money, changes DNS or sends mail.</pre>
   <p><button type="button" class="copy" data-copy="prompt">Copy the prompt</button></p>
-  <p class="note">Your relay password goes in on stdin, never on a command line, and mail that comes in is data to the agent, not orders.</p>
+  <p class="note">The <a href="assets/agents/install.sh">install script</a> checks the download against the release checksums. Your relay password goes in on stdin, never on a command line, and mail that comes in is data to the agent, not orders.</p>
 </section>
 
 <footer class="foot">
   <p class="install"><code>{{.data.install}}</code></p>
-  <p><a href="{{.urls.repo}}">Source on GitHub</a> · <a href="{{.urls.releases}}">Releases</a> · <a href="{{.urls.skill}}">SKILL.md for agents</a> · <a href="{{.urls.llms}}">llms.txt</a> · <a href="{{.urls.license}}">MIT licence</a></p>
+  <p><a href="{{.urls.repo}}">Source on GitHub</a> · <a href="{{.urls.releases}}">Releases</a> · <a href="assets/agents/SKILL.md">SKILL.md for agents</a> · <a href="assets/agents/llms.txt">llms.txt</a> · <a href="{{.urls.license}}">MIT licence</a></p>
   <p class="note">lfr means looking for readers; it's a sister of <a href="{{.urls.lfm}}">lfm</a>, which builds pages like this one.</p>
 </footer>
 

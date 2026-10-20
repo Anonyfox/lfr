@@ -1,12 +1,13 @@
 name: Pages
 
-# Builds lfr.email from site/ with lfm and publishes it with the files agents
-# fetch from the root: install.sh, SKILL.md and llms.txt.
+# Deploys lfr.email. site/ is an lfm project; it serves SKILL.md, install.sh and
+# llms.txt at the root from site/assets/agents (kept equal to the repository's
+# own files by internal/skills tests).
 
 on:
   push:
     branches: [main]
-    paths: [site/**, install.sh, SKILL.md, .github/workflows/pages.yml]
+    paths: ["site/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -19,32 +20,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
-      - name: Install lfm
-        run: go install github.com/Anonyfox/lfm/cmd/lfm@latest
-      - name: Compile the page
-        working-directory: site
-        run: lfm compile
-      - name: Add root files
-        run: |
-          cp install.sh SKILL.md site/extra/llms.txt site/output/
-          echo lfr.email > site/output/CNAME
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site/output
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: compile site with lfm
+        run: |
+          GOBIN="$RUNNER_TEMP" go install github.com/Anonyfox/lfm/cmd/lfm@latest
+          "$RUNNER_TEMP/lfm" compile site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/output
       - id: deployment
         uses: actions/deploy-pages@v4
+      # The CDN may lag behind the deployment for a moment.
+      - name: the site serves this commit
+        run: |
+          url="${{ steps.deployment.outputs.page_url }}"
+          for file in index.html SKILL.md install.sh llms.txt; do
+            for try in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS "${url%/}/$file" -o "$RUNNER_TEMP/served" && cmp -s "$RUNNER_TEMP/served" "site/output/$file"; then
+                continue 2
+              fi
+              sleep 15
+            done
+            echo "::error::$url serves another $file than site/output/$file"
+            exit 1
+          done

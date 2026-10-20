@@ -128,5 +128,7 @@ lists every check with the research behind it.
 - [AGENTS.md](AGENTS.md): how to change things: a command, a migration, a rule, a skill.
 - [Operations](docs/operations.md): DNS, relays, deliverability, backups, upgrades, troubleshooting.
 - [Contributing](CONTRIBUTING.md): building, testing, fuzzing, releasing.
+- [The lfr.email Grok Bot](docs/grok-bot.md): the handoff a Grok Bot follows to set up and share it.
+- [The lfr.email Grok Bot](docs/grok-bot.md): the handoff a Grok Bot follows to set up and share it.
 
 MIT licensed.
