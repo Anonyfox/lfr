@@ -1,0 +1,10 @@
+{{define "content"}}
+<h1>{{.Headline}}</h1>
+{{if .Pitch}}<p class="lede">{{.Pitch}}</p>{{end}}
+{{template "signup" .}}
+{{if .Issues}}<h2>{{t .Lang "home.archive"}}</h2>
+<ul class="issues">{{range .Issues}}
+<li><a class="title" href="{{.URL}}">{{.Subject}}</a><div class="meta">{{.Date}}</div>{{if .Summary}}<p>{{.Summary}}</p>{{end}}</li>{{end}}
+</ul>{{if .More}}<p><a href="{{.ArchiveURL}}">{{t .Lang "home.all"}}</a></p>{{end}}
+{{else}}<p class="meta">{{t .Lang "home.empty"}}</p>{{end}}
+{{end}}

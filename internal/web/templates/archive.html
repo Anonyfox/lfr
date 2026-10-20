@@ -1,0 +1,7 @@
+{{define "content"}}
+<h1>{{t .Lang "home.archive"}}</h1>
+<ul class="issues">{{range .Issues}}
+<li><a class="title" href="{{.URL}}">{{.Subject}}</a><div class="meta">{{.Date}}</div>{{if .Summary}}<p>{{.Summary}}</p>{{end}}</li>{{end}}
+</ul>
+{{template "signup" .}}
+{{end}}

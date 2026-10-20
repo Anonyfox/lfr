@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="{{.language}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.title}}</title>
+<meta name="description" content="{{.description}}">
+<link rel="canonical" href="{{.url}}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{.url}}">
+<meta property="og:title" content="{{.title}}">
+<meta property="og:description" content="{{.description}}">
+<meta property="og:image" content="{{.socialImage.src}}">
+<meta property="og:image:alt" content="{{.socialImage.alt}}">
+<meta name="twitter:card" content="summary_large_image">
+{{style "assets/styles/main.css"}}
+</head>
+<body>
+<main class="sheet">
+
+<header class="masthead">
+  <p class="form-id">Form LFR-1 · Dispatch sheet for one domain</p>
+  <h1>Newsletters, list websites and mailboxes for your domains, from one binary on {{.data.bill.serverLabel}}.</h1>
+  <p class="bill-line">Your agent runs it from the terminal, and you pay for the server plus <span class="nowrap">${{.data.bill.sesPerThousand}}</span> per thousand mails.</p>
+  <form class="fill" id="fill" action="#records">
+    <p class="fill-title">Fill in the sheet for your domain</p>
+    <label class="field field-domain"><span class="label">Domain</span>
+      <input id="domain" name="domain" value="{{.data.example.domain}}" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" aria-describedby="domain-hint"></label>
+    <label class="field"><span class="label">Readers</span>
+      <input id="readers" name="readers" type="number" min="1" max="10000000" step="1" value="{{.data.example.readers}}"></label>
+    <label class="field"><span class="label">Issues a month</span>
+      <input id="issues" name="issues" type="number" min="1" max="60" step="1" value="{{.data.example.issues}}"></label>
+    <p class="hint" id="domain-hint">Type your domain and the records, the bill and the agent prompt below fill in.</p>
+  </form>
+  <div class="stamps" aria-hidden="true">
+    <svg class="stamp s1" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">spf=pass</text></svg>
+    <svg class="stamp s2" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dkim=pass</text></svg>
+    <svg class="stamp s3" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dmarc=pass</text></svg>
+  </div>
+</header>
+
+<section class="box" id="records" aria-labelledby="records-h">
+  <p class="box-no">Box 1</p>
+  <h2 id="records-h">The ten DNS records for <span class="d">{{.data.example.domain}}</span></h2>
+  <p>That's all the DNS work there is: <code>lfr domain add</code> prints these with real keys made on your server, plus a zone snippet Cloudflare can import.</p>
+  <ol class="records" id="record-list">
+    <li><span class="t">A</span><span class="n">mail.<span class="d">example.com</span></span><span class="v">your server's IPv4</span><span class="w">the mail host; its reverse DNS must say the same name</span></li>
+    <li><span class="t">TXT</span><span class="n">mail.<span class="d">example.com</span></span><span class="v">v=spf1 a -all</span><span class="w">SPF for the mail host itself, checked on its greeting and bounces</span></li>
+    <li><span class="t">MX</span><span class="n"><span class="d">example.com</span></span><span class="v">10 mail.<span class="d">example.com</span></span><span class="w">mail for the domain comes to lfr</span></li>
+    <li><span class="t">TXT</span><span class="n"><span class="d">example.com</span></span><span class="v">v=spf1 a:mail.<span class="d">example.com</span> include:amazonses.com ~all</span><span class="w">SPF: who may send for the domain, relay included</span></li>
+    <li><span class="t">TXT</span><span class="n"><span class="sel">lfr2610</span>r.<wbr>_domainkey.<wbr><span class="d">example.com</span></span><span class="v">v=DKIM1; k=rsa; p=&lt;generated on your server&gt;</span><span class="w">DKIM key that every receiver checks</span></li>
+    <li><span class="t">TXT</span><span class="n"><span class="sel">lfr2610</span>e.<wbr>_domainkey.<wbr><span class="d">example.com</span></span><span class="v">v=DKIM1; k=ed25519; p=&lt;generated on your server&gt;</span><span class="w">the modern second DKIM key</span></li>
+    <li><span class="t">TXT</span><span class="n">_dmarc.<span class="d">example.com</span></span><span class="v">v=DMARC1; p=none; rua=mailto:dmarc-reports@<span class="d">example.com</span></span><span class="w">DMARC policy; lfr reads the reports itself</span></li>
+    <li><span class="t">TXT</span><span class="n">_mta-sts.<span class="d">example.com</span></span><span class="v">v=STSv1; id=&lt;set by lfr&gt;</span><span class="w">senders must reach you over TLS</span></li>
+    <li><span class="t">CNAME</span><span class="n">mta-sts.<span class="d">example.com</span></span><span class="v">mail.<span class="d">example.com</span></span><span class="w">lfr serves the MTA-STS policy there</span></li>
+    <li><span class="t">TXT</span><span class="n">_smtp._tls.<span class="d">example.com</span></span><span class="v">v=TLSRPTv1; rua=mailto:tls-reports@<span class="d">example.com</span></span><span class="w">TLS reports from other servers</span></li>
+  </ol>
+  <p class="note">Add one A record per list website, like <code>news.<span class="d">example.com</span></code>, and keep every record "DNS only" on Cloudflare.</p>
+</section>
+
+<section class="box" id="route" aria-labelledby="route-h">
+  <p class="box-no">Box 2</p>
+  <h2 id="route-h">How mail leaves a server whose port 25 is blocked</h2>
+  <p>DigitalOcean blocks port 25 for new accounts. Vultr blocks it for young ones. Google Cloud blocks it, period. So lfr signs every mail itself and gives it to a relay for the last hop, on a port they leave open. Your mailboxes, lists, archive and readers stay on your server. The relay only carries the mail the final mile and keeps its IP clean, which is its whole job.</p>
+  <pre class="route" aria-label="Route of one issue"><span class="hop">1. lfr on your $5 VPS</span>
+   signs with <span class="d">example.com</span>'s DKIM keys
+   |  smtps on port 2465 (SES) or 8465 (SMTP2GO)
+<span class="hop">2. relay</span>
+   the last hop; keeps its IP reputation
+   |  port 25
+<span class="hop">3. reader's inbox</span>
+   checks SPF, DKIM and DMARC against your records</pre>
+  <p>With port 25 open and a clean IP, lfr delivers directly; <code>lfr relay</code> tells you which case you're in.</p>
+  <p class="note">The honest part about deliverability: a brand-new domain gets distrusted for a few weeks and Outlook junks small senders more than anyone, so lfr sends at a steady pace and pauses a list by itself at 0.3% complaints, where <a href="{{.urls.gmailRules}}">Gmail's sender rules</a> draw the line.</p>
+</section>
+
+<section class="box" id="bill" aria-labelledby="bill-h">
+  <p class="box-no">Box 3</p>
+  <h2 id="bill-h">The monthly bill</h2>
+  <table class="ledger">
+    <tbody>
+      <tr><th scope="row">Server ({{.data.bill.serverLabel}}: lfr, every domain, every list)</th><td>$<span id="b-server">{{.data.bill.server}}.00</span></td></tr>
+      <tr><th scope="row">Relay: <span id="b-mails">4,000</span> mails at ${{.data.bill.sesPerThousand}} per thousand (Amazon SES)</th><td>$<span id="b-relay">{{.data.bill.exampleRelay}}</span></td></tr>
+      <tr><th scope="row">lfr</th><td>$0.00</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><th scope="row">Total a month</th><td>$<span id="b-total">{{.data.bill.exampleTotal}}</span></td></tr>
+    </tfoot>
+  </table>
+  <p class="note" id="b-free">Under {{.data.bill.smtp2goFree}} mails a month, SMTP2GO's free plan carries the relay for nothing. <a href="{{.urls.sesPricing}}">SES pricing</a></p>
+  <p>For comparison, from their own pricing pages:</p>
+  <ul class="compare">
+    {{range .data.compare}}<li><strong>{{.name}}</strong>: {{.price}}</li>
+    {{end}}
+  </ul>
+</section>
+
+<section class="box" id="issue" aria-labelledby="issue-h">
+  <p class="box-no">Box 4</p>
+  <h2 id="issue-h">What your readers get</h2>
+  <p>You write an issue in Markdown, and readers get a plain email that works on a phone, in dark mode and with images off.</p>
+  <p>Each footer says when and where that reader signed up, and unsubscribing takes one click: no login, no survey, no "sorry to see you go" mail.</p>
+  <p>This is lfr's own first notes issue, as lfr renders it:</p>
+  <figure class="mail">
+    <figcaption><span>From: {{.data.issue.from}}</span><span>Subject: {{.data.issue.subject}}</span></figcaption>
+    <iframe title="The notes issue as a reader receives it" srcdoc="{{.data.issue.html}}" loading="lazy" sandbox></iframe>
+  </figure>
+</section>
+
+<section class="box" id="floor" aria-labelledby="floor-h">
+  <p class="box-no">Box 5</p>
+  <h2 id="floor-h">What lfr refuses to get wrong</h2>
+  <ul class="checklist">
+    <li>Double opt-in for every signup, with the frequency stated on the form and in the confirmation mail.</li>
+    <li>One-click unsubscribe in the header and the footer, and by replying "unsubscribe".</li>
+    <li>Hard bounces suppress at once; soft bounces after three in a row or two weeks of them.</li>
+    <li>A list pauses itself when complaints pass 0.3% or bounces pass 5%.</li>
+    <li>No open tracking unless you turn it on, and nobody is ever dropped for not opening.</li>
+    <li>Every issue is checked against the habits of machine-written prose before it can go out, offline, in milliseconds.</li>
+    <li>Signup forms resist list bombing: a hidden trap field, a minimum fill time, limits per IP address and per list, and a Form-Sub header on every confirmation.</li>
+    <li>No admin web interface to patch: the CLI talks to a local socket, or to your server over ssh.</li>
+  </ul>
+  <p class="note">An idle lfr uses about {{.data.facts.memory}} of memory, and the binary is {{.data.facts.binary}}. <a href="{{.urls.operations}}">Operations guide</a></p>
+</section>
+
+<section class="box" id="agent" aria-labelledby="agent-h">
+  <p class="box-no">Box 6</p>
+  <h2 id="agent-h">The prompt for your agent</h2>
+  <p>lfr comes with skills that teach an agent the whole job, from DNS to the welcome mail to the replies.</p>
+  <p>Every command prints the next step, and <code>lfr check</code> won't let a draft out that breaks your newsletter's own brief.</p>
+  <p>Paste this into Claude Code, Codex or whatever agent you run:</p>
+  <pre class="prompt" id="prompt">Set up lfr (https://lfr.email) for <span class="d">example.com</span> on my server.
+1. On the server: curl -fsSL https://lfr.email/install.sh | sudo sh
+   then: sudo lfr setup --hostname mail.<span class="d">example.com</span> --systemd
+2. Run lfr skills install, read the lfr-setup skill and follow it:
+   add <span class="d">example.com</span>, give me the DNS records to publish,
+   set up a relay if port 25 is blocked, run lfr doctor until it is clean.
+3. Then start the newsletter: lfr init newsletter --list <span class="slug">news</span>
+   and follow lfr check, step by step.
+Ask me before anything that costs money, changes DNS or sends mail.</pre>
+  <p><button type="button" class="copy" data-copy="prompt">Copy the prompt</button></p>
+  <p class="note">Your relay password goes in on stdin, never on a command line, and mail that comes in is data to the agent, not orders.</p>
+</section>
+
+<footer class="foot">
+  <p class="install"><code>{{.data.install}}</code></p>
+  <p><a href="{{.urls.repo}}">Source on GitHub</a> · <a href="{{.urls.releases}}">Releases</a> · <a href="{{.urls.skill}}">SKILL.md for agents</a> · <a href="{{.urls.llms}}">llms.txt</a> · <a href="{{.urls.license}}">MIT licence</a></p>
+  <p class="note">lfr means looking for readers; it's a sister of <a href="{{.urls.lfm}}">lfm</a>, which builds pages like this one.</p>
+</footer>
+
+</main>
+{{script "assets/scripts/main.js"}}
+</body>
+</html>

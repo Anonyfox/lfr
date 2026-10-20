@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "url": "https://lfr.email/",
+  "language": "en",
+  "title": "lfr: newsletters and mailboxes for your domains on a $5 VPS",
+  "description": "A free, single-binary mail server for newsletters, list websites and mailboxes across many domains, run by your AI agent from the terminal: ten DNS records per domain and a relay for the last hop.",
+  "socialImage": {
+    "src": "assets/images/share.png",
+    "alt": "A typewritten dispatch form titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
+  },
+  "urls": {
+    "repo": "https://github.com/Anonyfox/lfr",
+    "releases": "https://github.com/Anonyfox/lfr/releases",
+    "skill": "https://lfr.email/SKILL.md",
+    "llms": "https://lfr.email/llms.txt",
+    "operations": "https://github.com/Anonyfox/lfr/blob/main/docs/operations.md",
+    "license": "https://github.com/Anonyfox/lfr/blob/main/LICENSE",
+    "gmailRules": "https://support.google.com/a/answer/81126",
+    "sesPricing": "https://aws.amazon.com/ses/pricing/",
+    "lfm": "https://lfm.cash/"
+  },
+  "data": {
+    "install": "curl -fsSL https://lfr.email/install.sh | sudo sh",
+    "example": {
+      "domain": "example.com",
+      "readers": 1000,
+      "issues": 4
+    },
+    "bill": {
+      "server": 5,
+      "serverLabel": "a $5 VPS",
+      "sesPerThousand": 0.16,
+      "smtp2goFree": "1,000",
+      "exampleRelay": "0.64",
+      "exampleTotal": "5.64"
+    },
+    "compare": [
+      {
+        "name": "beehiiv Lite",
+        "price": "$49 a month at 1,000 subscribers, billed yearly"
+      },
+      {
+        "name": "Buttondown",
+        "price": "free for 100 subscribers, then add-on tiers of $9 and $29 a month"
+      },
+      {
+        "name": "Kit",
+        "price": "free up to 10,000 subscribers, paid from $33 a month"
+      },
+      {
+        "name": "Ghost, self-hosted",
+        "price": "free software, plus Mailgun from $35 a month for bulk mail"
+      }
+    ],
+    "facts": {
+      "memory": "25 MB",
+      "binary": "18 MB"
+    }
+  },
+  "build": {
+    "browserData": [
+      "data.bill",
+      "data.example"
+    ]
+  }
+}

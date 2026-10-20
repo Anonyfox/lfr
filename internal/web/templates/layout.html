@@ -1,0 +1,70 @@
+{{define "layout"}}<!doctype html>
+<html lang="{{.Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title>
+{{if .Description}}<meta name="description" content="{{.Description}}">{{end}}
+{{if .Canonical}}<link rel="canonical" href="{{.Canonical}}">{{end}}
+{{if .FeedURL}}<link rel="alternate" type="application/atom+xml" title="{{.ListName}}" href="{{.FeedURL}}">{{end}}
+<meta name="color-scheme" content="light dark">
+{{if .Robots}}<meta name="robots" content="{{.Robots}}">{{end}}
+{{template "style" .}}
+</head>
+<body>
+<main class="wrap">
+{{if and .ListName (not .Home)}}<header class="brand"><a href="{{.HomeURL}}">{{.ListName}}</a></header>{{end}}
+{{template "content" .}}
+</main>
+<footer class="wrap foot">
+{{if .FeedURL}}<a href="{{.FeedURL}}">{{t .Lang "feed"}}</a>{{end}}
+{{if .ImprintURL}}<a href="{{.ImprintURL}}">{{t .Lang "footer.imprint"}}</a>{{end}}
+{{if .PrivacyURL}}<a href="{{.PrivacyURL}}">{{t .Lang "footer.privacy"}}</a>{{end}}
+</footer>
+</body>
+</html>{{end}}
+
+{{define "style"}}<style>
+:root{--bg:#fafaf9;--fg:#1c1917;--muted:#78716c;--line:#e7e5e4;--card:#fff;--accent:#0f766e;--accent-fg:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1917;--fg:#f5f5f4;--muted:#a8a29e;--line:#44403c;--card:#292524;--accent:#2dd4bf;--accent-fg:#042f2e}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px}
+main.wrap{padding-top:40px;padding-bottom:24px}
+.brand{font-weight:700;font-size:15px;letter-spacing:.02em;margin-bottom:40px}
+.brand a{color:var(--fg);text-decoration:none}
+h1{font-size:clamp(30px,6vw,42px);line-height:1.15;margin:0 0 16px;letter-spacing:-.02em}
+h2{font-size:24px;line-height:1.25;margin:40px 0 12px}
+h3{font-size:19px;margin:28px 0 8px}
+p{margin:0 0 18px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border-radius:6px}
+blockquote{margin:0 0 18px;padding:2px 0 2px 18px;border-left:3px solid var(--line);color:var(--muted)}
+pre{background:var(--card);border:1px solid var(--line);padding:14px;border-radius:8px;overflow:auto;font-size:14px}
+code{font:14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:0 0 18px}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+.lede{font-size:20px;color:var(--muted);margin-bottom:28px}
+.signup{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:28px 0 40px}
+.signup .row{display:flex;gap:10px;flex-wrap:wrap}
+.signup input[type=email]{flex:1 1 220px;min-width:0;font:inherit;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+button{font:inherit;font-weight:600;padding:11px 20px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-fg);cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cadence{font-size:15px;margin:12px 0 0;font-weight:600}
+.consent{font-size:14px;color:var(--muted);margin:10px 0 0}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.issues{list-style:none;padding:0;margin:0}
+.issues li{padding:18px 0;border-top:1px solid var(--line)}
+.issues a.title{font-weight:650;font-size:19px;color:var(--fg);text-decoration:none}
+.issues a.title:hover{text-decoration:underline}
+.meta{font-size:14px;color:var(--muted)}
+.issues p{margin:6px 0 0;color:var(--muted)}
+.foot{display:flex;gap:18px;flex-wrap:wrap;padding-top:24px;padding-bottom:40px;border-top:1px solid var(--line);font-size:14px}
+.foot a{color:var(--muted)}
+.notice{text-align:left;padding-top:20px}
+.cta{margin:8px 0 26px}
+a.button{display:inline-block;padding:11px 20px;border-radius:8px;background:var(--accent);color:var(--accent-fg);font-weight:600;text-decoration:none}
+a.button:hover{filter:brightness(1.08)}
+</style>{{end}}

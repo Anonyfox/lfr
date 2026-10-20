@@ -1,0 +1,7 @@
+{{define "content"}}
+<section class="notice">
+<h1>{{.Heading}}</h1>
+<p>{{.Body}}</p>
+{{if .Action}}<form method="post" action="{{.Action}}"><button type="submit">{{.Button}}</button></form>{{end}}
+</section>
+{{end}}

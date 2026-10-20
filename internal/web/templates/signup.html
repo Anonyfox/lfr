@@ -1,0 +1,10 @@
+{{define "signup"}}<form class="signup" method="post" action="{{.SignupURL}}">
+<div class="row">
+<label class="hp" aria-hidden="true">Website <input name="website" tabindex="-1" autocomplete="off"></label>
+<input type="hidden" name="ts" value="{{.FormToken}}">
+<input type="email" name="email" required autocomplete="email" placeholder="{{t .Lang "form.email"}}" aria-label="{{t .Lang "form.email"}}">
+<button type="submit">{{t .Lang "form.submit"}}</button>
+</div>
+{{if .Cadence}}<p class="cadence">{{.Cadence}}</p>{{end}}
+<p class="consent">{{.Consent}}</p>
+</form>{{end}}
