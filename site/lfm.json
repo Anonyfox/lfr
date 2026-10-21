@@ -15,7 +15,8 @@
     "license": "https://github.com/Anonyfox/lfr/blob/main/LICENSE",
     "gmailRules": "https://support.google.com/a/answer/81126",
     "sesPricing": "https://aws.amazon.com/ses/pricing/",
-    "lfm": "https://lfm.cash/"
+    "lfm": "https://lfm.cash/",
+    "analytics": "https://static.cloudflareinsights.com/beacon.min.js"
   },
   "data": {
     "install": "curl -fsSL https://lfr.email/install.sh | sudo sh",
