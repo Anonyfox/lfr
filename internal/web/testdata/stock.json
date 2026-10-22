@@ -1,0 +1,212 @@
+{
+ "source": "github.com/Anonyfox/lfm internal/stock/stock.go, copied 2026-10-22; lfr must not import lfm",
+ "accents": [
+  {
+   "name": "Tailwind indigo-400",
+   "value": "#818cf8"
+  },
+  {
+   "name": "Tailwind indigo-500",
+   "value": "#6366f1"
+  },
+  {
+   "name": "Tailwind indigo-600",
+   "value": "#4f46e5"
+  },
+  {
+   "name": "Tailwind indigo-700",
+   "value": "#4338ca"
+  },
+  {
+   "name": "Tailwind violet-400",
+   "value": "#a78bfa"
+  },
+  {
+   "name": "Tailwind violet-500",
+   "value": "#8b5cf6"
+  },
+  {
+   "name": "Tailwind violet-600",
+   "value": "#7c3aed"
+  },
+  {
+   "name": "Tailwind violet-700",
+   "value": "#6d28d9"
+  },
+  {
+   "name": "Tailwind purple-400",
+   "value": "#c084fc"
+  },
+  {
+   "name": "Tailwind purple-500",
+   "value": "#a855f7"
+  },
+  {
+   "name": "Tailwind purple-600",
+   "value": "#9333ea"
+  },
+  {
+   "name": "Tailwind purple-700",
+   "value": "#7e22ce"
+  },
+  {
+   "name": "Bootstrap primary blue",
+   "value": "#0d6efd"
+  },
+  {
+   "name": "Tailwind v4 indigo-400",
+   "value": "oklch(67.3% 0.182 276.935)"
+  },
+  {
+   "name": "Tailwind v4 indigo-500",
+   "value": "oklch(58.5% 0.233 277.117)"
+  },
+  {
+   "name": "Tailwind v4 indigo-600",
+   "value": "oklch(51.1% 0.262 276.966)"
+  },
+  {
+   "name": "Tailwind v4 indigo-700",
+   "value": "oklch(45.7% 0.24 277.023)"
+  },
+  {
+   "name": "Tailwind v4 violet-400",
+   "value": "oklch(70.2% 0.183 293.541)"
+  },
+  {
+   "name": "Tailwind v4 violet-500",
+   "value": "oklch(60.6% 0.25 292.717)"
+  },
+  {
+   "name": "Tailwind v4 violet-600",
+   "value": "oklch(54.1% 0.281 293.009)"
+  },
+  {
+   "name": "Tailwind v4 violet-700",
+   "value": "oklch(49.1% 0.27 292.581)"
+  },
+  {
+   "name": "Tailwind v4 purple-400",
+   "value": "oklch(71.4% 0.203 305.504)"
+  },
+  {
+   "name": "Tailwind v4 purple-500",
+   "value": "oklch(62.7% 0.265 303.9)"
+  },
+  {
+   "name": "Tailwind v4 purple-600",
+   "value": "oklch(55.8% 0.288 302.321)"
+  },
+  {
+   "name": "Tailwind v4 purple-700",
+   "value": "oklch(49.6% 0.265 301.924)"
+  }
+ ],
+ "creams": [
+  "#f4f1ea",
+  "#faf9f5",
+  "#f7f1e4",
+  "#f0eee6"
+ ],
+ "terracottas": [
+  "#d97757",
+  "#c96442",
+  "#d9622b",
+  "#cc785c"
+ ],
+ "windowControls": [
+  [
+   "#ff5f56",
+   "#ff5f57"
+  ],
+  [
+   "#ffbd2e",
+   "#febc2e"
+  ],
+  [
+   "#27c93f",
+   "#28c840"
+  ]
+ ],
+ "genericSans": [
+  "inter",
+  "roboto",
+  "arial",
+  "poppins",
+  "geist",
+  "system-ui",
+  "-apple-system",
+  "blinkmacsystemfont",
+  "sans-serif",
+  "manrope",
+  "dm sans",
+  "plus jakarta sans",
+  "open sans",
+  "montserrat",
+  "lato"
+ ],
+ "display": [
+  "space grotesk",
+  "instrument serif",
+  "fraunces",
+  "syne",
+  "geist",
+  "clash display",
+  "cabinet grotesk",
+  "satoshi",
+  "general sans"
+ ],
+ "mono": [
+  "monospace",
+  "ui-monospace",
+  "menlo",
+  "monaco",
+  "consolas",
+  "sf mono",
+  "jetbrains mono",
+  "ibm plex mono",
+  "space mono",
+  "courier",
+  "courier new",
+  "roboto mono",
+  "fira code",
+  "fira mono",
+  "dm mono",
+  "geist mono",
+  "chivo mono",
+  "source code pro",
+  "berkeley mono",
+  "commit mono",
+  "martian mono"
+ ],
+ "kitTokens": [
+  "222.2 84% 4.9%",
+  "222.2 47.4% 11.2%",
+  "210 40% 98%",
+  "210 40% 96.1%",
+  "215.4 16.3% 46.9%",
+  "214.3 31.8% 91.4%",
+  "0 84.2% 60.2%",
+  "212.7 26.8% 83.9%",
+  "217.2 32.6% 17.5%",
+  "240 10% 3.9%",
+  "240 5.9% 10%",
+  "0 0% 98%",
+  "240 4.8% 95.9%",
+  "240 3.8% 46.1%",
+  "240 5.9% 90%",
+  "240 3.7% 15.9%",
+  "240 5% 64.9%",
+  "oklch(0.145 0 0)",
+  "oklch(0.205 0 0)",
+  "oklch(0.985 0 0)",
+  "oklch(0.97 0 0)",
+  "oklch(0.556 0 0)",
+  "oklch(0.922 0 0)",
+  "oklch(0.708 0 0)",
+  "oklch(0.269 0 0)",
+  "oklch(0.439 0 0)",
+  "oklch(0.577 0.245 27.325)",
+  "oklch(0.704 0.191 22.216)"
+ ]
+}

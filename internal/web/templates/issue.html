@@ -1,9 +1,8 @@
 {{define "content"}}
 <article>
-<div class="meta">{{.Issue.Date}}</div>
+<p class="meta dateline">{{.Issue.Date}}</p>
 {{.Issue.Body}}
 </article>
-<hr>
 {{template "signup" .}}
-<p><a href="{{.ArchiveURL}}">← {{t .Lang "issue.back"}}</a></p>
+<p class="back"><a href="{{.ArchiveURL}}">← {{t .Lang "issue.back"}}</a></p>
 {{end}}

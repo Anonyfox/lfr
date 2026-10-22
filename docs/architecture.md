@@ -36,7 +36,7 @@ scheduler and the control socket the CLI talks to. All state is in one data dire
 | `spam` | Rule features, Bayes (Robinson–Fisher), reputation, and logistic weights that learn from moves. |
 | `dnsbl` | DNS blocklist lookups that tell listings from refusal codes. |
 | `feedback` | Parsers for bounces (RFC 3464), complaints (RFC 5965), DMARC and TLS reports, relay webhooks. |
-| `web` | List sites (templates uploaded with `lfr site` or `lfr push`, validated before they go live), signup/confirm/unsubscribe, tracking redirects, feeds, MTA-STS policies, webhooks (SES verified by SNS signature). |
+| `web` | List sites (templates uploaded with `lfr site` or `lfr push`, validated before they go live; their look is explained in [web-design.md](web-design.md)), signup/confirm/unsubscribe, tracking redirects, feeds, MTA-STS policies, webhooks (SES verified by SNS signature). |
 | `certs` | Let's Encrypt via autocert with a self-signed fallback and failure backoff. |
 | `token` | HMAC-signed, case-insensitive tokens for every link and VERP address. |
 | `events` | The event log and its live fan-out to `lfr events --follow`. |
