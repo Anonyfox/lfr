@@ -1,6 +1,16 @@
 # lfr
 
-**Looking for readers.**
+[![CI](https://github.com/Anonyfox/lfr/actions/workflows/ci.yml/badge.svg)](https://github.com/Anonyfox/lfr/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Anonyfox/lfr)](https://github.com/Anonyfox/lfr/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Anonyfox/lfr.svg)](https://pkg.go.dev/github.com/Anonyfox/lfr)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+**Your own mail server and newsletters in one Go binary on a $5 server, run by your agent from the
+terminal.** No admin UI, no per-subscriber bill.
+
+```sh
+curl -fsSL https://lfr.email/install.sh | sh
+```
 
 `lfr` runs mail for your domains from one binary on one small server: mailboxes, and newsletters with
 their websites. An agent operates it through a CLI, on the server or over ssh; there is no admin UI, no
@@ -26,11 +36,8 @@ droplet with dozens of domains.
 
 ## Install
 
-```sh
-curl -fsSL https://lfr.email/install.sh | sh
-```
-
-Linux and macOS, amd64 and arm64. With Go 1.26 or newer: `go install github.com/Anonyfox/lfr/cmd/lfr@latest`.
+The script at the top installs the latest release for Linux and macOS, amd64 and arm64, after checking
+it against the release checksums. With Go 1.26 or newer: `go install github.com/Anonyfox/lfr/cmd/lfr@latest`.
 
 ## 1. A mail server
 
@@ -128,7 +135,6 @@ lists every check with the research behind it.
 - [AGENTS.md](AGENTS.md): how to change things: a command, a migration, a rule, a skill.
 - [Operations](docs/operations.md): DNS, relays, deliverability, backups, upgrades, troubleshooting.
 - [Contributing](CONTRIBUTING.md): building, testing, fuzzing, releasing.
-- [The lfr.email Grok Bot](docs/grok-bot.md): the handoff a Grok Bot follows to set up and share it.
 - [The lfr.email Grok Bot](docs/grok-bot.md): the handoff a Grok Bot follows to set up and share it.
 
 MIT licensed.
