@@ -21,7 +21,7 @@
 
 <header class="masthead">
   <p class="form-id">Form LFR-1 · Dispatch sheet for one domain</p>
-  <h1>Newsletters, list websites and mailboxes for your domains, from one binary on {{.data.bill.serverLabel}}.</h1>
+  <h1>Your own mail server for your domains, with newsletters and their websites, from one binary on {{.data.bill.serverLabel}}.</h1>
   <p class="bill-line">Your agent runs it from the terminal, and you pay for the server plus <span class="nowrap">${{.data.bill.sesPerThousand}}</span> per thousand mails.</p>
   <form class="fill" id="fill" action="#records">
     <p class="fill-title">Fill in the sheet for your domain</p>
@@ -33,6 +33,10 @@
       <input id="issues" name="issues" type="number" min="1" max="60" step="1" value="{{.data.example.issues}}"></label>
     <p class="hint" id="domain-hint">Type your domain and the records, the bill and the agent prompt below fill in.</p>
   </form>
+  <div class="install">
+    <code id="install-command">{{.data.install}}</code>
+    <div class="install-actions"><button type="button" class="copy" data-copy="install-command">Copy install command</button> <a href="{{.urls.repo}}">Star on GitHub</a></div>
+  </div>
   <div class="stamps" aria-hidden="true">
     <svg class="stamp s1" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">spf=pass</text></svg>
     <svg class="stamp s2" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dkim=pass</text></svg>
@@ -121,7 +125,7 @@
     <li>Signup forms resist list bombing: a hidden trap field, a minimum fill time, limits per IP address and per list, and a Form-Sub header on every confirmation.</li>
     <li>No admin web interface to patch: the CLI talks to a local socket, or to your server over ssh.</li>
   </ul>
-  <p class="note">An idle lfr uses about {{.data.facts.memory}} of memory, and the binary is {{.data.facts.binary}}. <a href="{{.urls.operations}}">Operations guide</a></p>
+  <p class="note">An idle lfr uses about {{.data.facts.memory}} of memory: one Go binary, one process. <a href="{{.urls.operations}}">Operations guide</a></p>
 </section>
 
 <section class="box" id="agent" aria-labelledby="agent-h">
@@ -145,8 +149,7 @@ Ask me before anything that costs money, changes DNS or sends mail.</pre>
 </section>
 
 <footer class="foot">
-  <p class="install"><code>{{.data.install}}</code></p>
-  <p><a href="{{.urls.repo}}">Source on GitHub</a> · <a href="{{.urls.releases}}">Releases</a> · <a href="assets/agents/SKILL.md">SKILL.md for agents</a> · <a href="assets/agents/llms.txt">llms.txt</a> · <a href="{{.urls.license}}">MIT licence</a></p>
+  <p><a href="{{.urls.repo}}">Source on GitHub</a> · <a href="{{.urls.releases}}">Releases</a> · <a href="assets/agents/SKILL.md">SKILL.md for agents</a> · <a href="assets/agents/llms.txt">llms.txt</a> · <a href="{{.urls.license}}">MIT licence</a> · <a href="{{.urls.impressum}}" lang="de">Impressum</a> · <a href="{{.urls.privacy}}" lang="de">Datenschutz</a></p>
   <p class="note">lfr means looking for readers; it's a sister of <a href="{{.urls.lfm}}">lfm</a>, which builds pages like this one.</p>
 </footer>
 

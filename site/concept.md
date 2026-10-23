@@ -47,7 +47,7 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
 - Mailgun's smallest paid plan costs $35 a month, the floor for a self-hosted Ghost newsletter. V101 V102
 - Mailchimp cost $475 a month for 100,000 subscribers, Sendy plus SES $10 per send to all of them. V022
 - A fresh Stalwart install uses 188 MiB of memory; a Postfix, Dovecot and OpenDKIM stack 64 MiB. V083
-- Idle, the lfr server holds about 25 MB of memory, and its stripped binary is 18 MB. https://github.com/Anonyfox/lfr/blob/main/docs/operations.md
+- Idle, the lfr server holds about 25 MB of memory, and it is one Go binary. https://github.com/Anonyfox/lfr/blob/main/docs/operations.md
 - lfr prints ten DNS records per domain: A and SPF for the mail host, MX, SPF, two DKIM keys (RSA and Ed25519), DMARC, MTA-STS policy and host, TLS reporting. https://github.com/Anonyfox/lfr/blob/main/docs/operations.md
 - Gmail requires SPF, DKIM, DMARC and one-click unsubscribe from senders of 5,000 mails a day and keeps spam rates under 0.3%. https://support.google.com/a/answer/81126
 - Gmail clips messages above 102 KB behind "View entire message". https://www.litmus.com/blog/how-to-keep-gmail-from-clipping-your-emails
@@ -99,12 +99,12 @@ A setup sheet for the visitor's own domain, laid out like a postal dispatch form
 1. Header: the job in one line, the bill in one line under it, and the domain field that fills the sheet. V044 V016
 2. Box 1, records: the ten DNS records for the typed domain, each with what it does; keys marked as generated on the server. V071 V077
 3. Box 2, route: how mail leaves a VPS whose port 25 is blocked: the relay for the last hop, alternate ports, and the received headers stamped pass. V041 V045 V127 V072
-  Open: Paste the Authentication-Results header Gmail wrote into a real lfr issue, so Box 2 can show it verbatim.
+  Show the route without received headers until a real lfr issue reaches Gmail; the postmarks remain the stamp motif (V048 V143).
 4. Box 3, bill: server, relay and domain lines for the visitor's readers and sends, next to what tier pricing charges for the same list. V016 V022 V145
 5. Box 4, the issue: the email a reader receives, rendered, with the footer saying when and where they signed up and the one-click unsubscribe. V026 V120
 6. Box 5, the floor: what lfr refuses to get wrong (double opt-in, unsubscribe, bounces, complaint pause, no tracking by default, no admin UI). V084 V105 V151
 7. Box 6, the agent: the prompt to copy and what the skills teach it; the agent never sees a password it does not need. V058 V052 V139
-8. Footer: install line, repository, licence, the honest limits. V125 V122
+8. Footer: repository, licence, the honest limits; the install line and a plain repository link sit below the header form so a ready visitor can start. V125 V122 V058
 
 ## Palette
 | Role | Color | Source |
@@ -146,3 +146,4 @@ Reduced motion: the stamps are simply present; fields update without transitions
 ## Changelog
 - 2026-10-20: first concept from research batch 2026-10-20 (178 voices, 26 peers).
 - 2026-10-20: Box 2 shows the route without received headers until a real lfr issue reached Gmail; the postmarks stay as the stamp motif.
+- 2026-10-23: move the install line below the header form, with a copy button and a plain Star on GitHub link; keep the footer links without repeating the command (V058 V125). Resolve the stale received-header question to match the 2026-10-20 decision.

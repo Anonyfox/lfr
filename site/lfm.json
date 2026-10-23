@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "url": "https://lfr.email/",
   "language": "en",
-  "title": "lfr: newsletters and mailboxes for your domains on a $5 VPS",
-  "description": "A free, single-binary mail server for newsletters, list websites and mailboxes across many domains, run by your AI agent from the terminal: ten DNS records per domain and a relay for the last hop.",
+  "title": "lfr: your own mail server and newsletters on a $5 VPS",
+  "description": "Your own mail server for many domains, with newsletters and their websites, in one Go binary your coding agent runs. No SaaS, no per-subscriber bill.",
   "socialImage": {
     "src": "assets/images/share.png",
     "alt": "A typewritten dispatch form titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
@@ -16,7 +16,12 @@
     "gmailRules": "https://support.google.com/a/answer/81126",
     "sesPricing": "https://aws.amazon.com/ses/pricing/",
     "lfm": "https://lfm.cash/",
-    "analytics": "https://static.cloudflareinsights.com/beacon.min.js"
+    "mit": "https://opensource.org/licenses/MIT",
+    "install": "https://lfr.email/install.sh",
+    "author": "https://github.com/Anonyfox",
+    "analytics": "https://static.cloudflareinsights.com/beacon.min.js",
+    "impressum": "https://lab.anonyfox.com/impressum/",
+    "privacy": "https://lab.anonyfox.com/datenschutz/"
   },
   "data": {
     "install": "curl -fsSL https://lfr.email/install.sh | sudo sh",
@@ -52,8 +57,7 @@
       }
     ],
     "facts": {
-      "memory": "25 MB",
-      "binary": "18 MB"
+      "memory": "25 MB"
     }
   },
   "build": {
@@ -67,6 +71,28 @@
         "assets/agents/install.sh": "file",
         "assets/agents/llms.txt": "file"
       }
+    }
+  },
+  "jsonld": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "lfr",
+    "description": "{{.description}}",
+    "url": "{{.url}}",
+    "applicationCategory": "CommunicationApplication",
+    "operatingSystem": "Linux, macOS",
+    "license": "{{.urls.mit}}",
+    "codeRepository": "{{.urls.repo}}",
+    "downloadUrl": "{{.urls.install}}",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Maximilian Stroh",
+      "url": "{{.urls.author}}"
     }
   }
 }

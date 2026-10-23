@@ -197,7 +197,10 @@ strong { font-weight: 700; }
 .copy:focus-visible { outline: 2px solid var(--airmail); outline-offset: 3px; }
 
 .foot { border-top: 3px double var(--ink); padding-top: 18px; }
-.install code { display: inline-block; padding: 8px 10px; font-size: 16px; overflow-wrap: anywhere; }
+.install { margin-top: 12px; }
+.install code { display: block; width: fit-content; max-width: 100%; padding: 8px 1px; font-size: clamp(12px, 3.05vw, 15px); white-space: nowrap; }
+.install-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; font-size: 14px; }
+.install .copy { font-size: 14px; padding: 8px; }
 
 @media (max-width: 900px) {
   .stamps { position: static; flex-direction: row; justify-content: flex-end; margin-top: 4px; }
