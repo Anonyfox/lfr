@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: If you use lfr in your work, please cite it as below.
+type: software
+title: "lfr: mail server and newsletters in one binary"
+abstract: "Self-hosted mail server and newsletter platform in one Go binary, operated by an agent through a JSON CLI."
+authors:
+  - family-names: Stroh
+    given-names: Maximilian
+    alias: Anonyfox
+repository-code: "https://github.com/Anonyfox/lfr"
+url: "https://lfr.email"
+license: MIT
+version: "0.2.0"
+date-released: "2026-10-22"
