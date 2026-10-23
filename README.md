@@ -5,8 +5,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/Anonyfox/lfr.svg)](https://pkg.go.dev/github.com/Anonyfox/lfr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**Your own mail server and newsletters in one Go binary on a $5 server, run by your agent from the
-terminal.** No admin UI, no per-subscriber bill.
+**Your own mail server and newsletters in one Go binary on a $5 VPS, run by your coding agent from
+the terminal.** No admin UI, no per-subscriber bill.
 
 ```sh
 curl -fsSL https://lfr.email/install.sh | sh
@@ -31,7 +31,7 @@ provider blocks port 25).
   the agent skills rest on built-in research (`lfr evidence`): 136 reader and writer voices, 20
   newsletters and 144 standards, studies and benchmarks, quoted verbatim.
 
-Pure Go, SQLite, one process. About 25 MB of memory idle and an 18 MB binary; comfortable on a 512 MB
+Pure Go, SQLite, one process. About 25 MB of memory idle; comfortable on a 512 MB
 droplet with dozens of domains.
 
 ## Install

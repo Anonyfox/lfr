@@ -17,8 +17,8 @@ capped at 400 MB. Add the user your agent runs as to the `lfr` group to use the 
 
 Open ports 25, 80 and 443 in any firewall. Port 80 is needed for Let's Encrypt and redirects to HTTPS.
 
-Measured on 2026-10-20: the stripped release binary is 18 MB, and an idle server holds about 25 MB of
-memory (resident set size) with one domain and one list.
+Measured on 2026-10-20: an idle server holds about 25 MB of memory (resident set size) with one domain
+and one list.
 
 **From a laptop.** The agent and the newsletter files usually live elsewhere. With ssh access as a
 member of the `lfr` group, `LFR_REMOTE=user@server lfr <command>` (or `--remote`) runs every command
