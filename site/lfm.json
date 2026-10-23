@@ -4,6 +4,9 @@
   "language": "en",
   "title": "lfr: your own mail server and newsletters on a $5 VPS",
   "description": "Your own mail server for many domains, with newsletters and their websites, in one Go binary your coding agent runs. No SaaS, no per-subscriber bill.",
+  "social": {
+    "x": "@AnonyfoxCom"
+  },
   "socialImage": {
     "src": "assets/images/share.png",
     "alt": "A typewritten dispatch form titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
