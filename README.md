@@ -37,7 +37,7 @@ droplet with dozens of domains.
 ## Install
 
 The script at the top installs the latest release for Linux and macOS, amd64 and arm64, after checking
-it against the release checksums. With Go 1.26 or newer: `go install github.com/Anonyfox/lfr/cmd/lfr@latest`.
+it against the release checksums. With Homebrew: `brew install anonyfox/tap/lfr`. With Go 1.26 or newer: `go install github.com/Anonyfox/lfr/cmd/lfr@latest`.
 
 ## 1. A mail server
 
