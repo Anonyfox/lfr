@@ -43,7 +43,14 @@ jobs:
         with:
           go-version-file: go.mod
       - name: test
-        run: go test -race -timeout 15m ./...
+        run: go test -race -timeout 15m -coverprofile=coverage.out -covermode=atomic ./...
+      - name: upload coverage
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+          fail_ci_if_error: false
 
   fuzz:
     runs-on: ubuntu-latest

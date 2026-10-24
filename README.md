@@ -1,6 +1,7 @@
 # lfr
 
 [![CI](https://github.com/Anonyfox/lfr/actions/workflows/ci.yml/badge.svg)](https://github.com/Anonyfox/lfr/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Anonyfox/lfr/graph/badge.svg)](https://codecov.io/gh/Anonyfox/lfr)
 [![Release](https://img.shields.io/github/v/release/Anonyfox/lfr)](https://github.com/Anonyfox/lfr/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/Anonyfox/lfr.svg)](https://pkg.go.dev/github.com/Anonyfox/lfr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
