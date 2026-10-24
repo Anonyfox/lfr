@@ -720,7 +720,7 @@ func TestRelayWebhookReceipt(t *testing.T) {
 	h := start(t)
 	ctx := context.Background()
 	check := h.e.relayWebhookCheck(ctx, "https://mail.example.com/hooks/configure")
-	if check.Status != "skip" || !strings.Contains(check.Detail, "/hooks/configure") {
+	if check.Status != "info" || !strings.Contains(check.Detail, "configured, no notification yet") || !strings.Contains(check.Detail, "/hooks/configure") {
 		t.Fatalf("fresh webhook: %+v", check)
 	}
 	post := func(path, body string, want int) {
@@ -735,7 +735,7 @@ func TestRelayWebhookReceipt(t *testing.T) {
 	}
 	post("/hooks/wrong/smtp2go", "{}", 404)
 	post(h.e.Web.HookPath("smtp2go"), "{", 400)
-	if c := h.e.relayWebhookCheck(ctx, "url"); c.Status != "skip" {
+	if c := h.e.relayWebhookCheck(ctx, "url"); c.Status != "info" {
 		t.Fatalf("invalid receipt: %+v", c)
 	}
 	post(h.e.Web.HookPath("smtp2go"), `{"event":"bounce","rcpt":"unknown@example.org","bounce":"hard"}`, 204)
@@ -864,5 +864,14 @@ func TestBackupCancellationRemovesSnapshot(t *testing.T) {
 	leftovers, err := filepath.Glob(filepath.Join(h.e.Opts.Data, ".backup-*"))
 	if err != nil || len(leftovers) != 0 {
 		t.Fatalf("snapshot leftovers %v %v", leftovers, err)
+	}
+}
+
+func TestBackupRefusesOldClients(t *testing.T) {
+	h := start(t)
+	// lfr 0.2.1 and older sent the target directory and expected one answer.
+	err := h.c.Call(context.Background(), api.OpBackup, map[string]string{"dir": "/var/backups/lfr"}, nil)
+	if err == nil || !strings.Contains(err.Error(), "this lfr CLI is older") {
+		t.Fatalf("old client: %v", err)
 	}
 }

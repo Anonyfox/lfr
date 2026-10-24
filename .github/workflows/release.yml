@@ -19,10 +19,14 @@ jobs:
           go-version-file: go.mod
       - name: test
         run: go test -race -timeout 15m ./...
+      - name: release notes from CHANGELOG.md
+        run: |
+          awk -v v="## ${GITHUB_REF_NAME#v} " 'index($0, v) == 1 {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          grep -q . "$RUNNER_TEMP/notes.md" || { echo "CHANGELOG.md has no section for ${GITHUB_REF_NAME}"; exit 1; }
       - uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
-          args: release --clean
+          args: release --clean --release-notes ${{ runner.temp }}/notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}

@@ -540,7 +540,16 @@ func (e *Engine) register() {
 	}))
 	h(api.OpSpamReset, op(func(ctx context.Context, _ struct{}) (any, error) { return nil, e.Spam.Reset(ctx) }))
 	h(api.OpReports, op(func(ctx context.Context, a api.Reports) (any, error) { return e.reports(ctx, a) }))
-	e.Ctl.Stream(api.OpBackup, func(ctx context.Context, _ json.RawMessage, send func(any) error) error { return e.Backup(ctx, send) })
+	e.Ctl.Stream(api.OpBackup, func(ctx context.Context, args json.RawMessage, send func(any) error) error {
+		// A CLI from lfr 0.2.1 or older asks the server to write into a directory.
+		var old struct {
+			Dir string `json:"dir"`
+		}
+		if json.Unmarshal(args, &old) == nil && old.Dir != "" {
+			return invalid("this server (lfr %s) streams backups to the CLI, and this lfr CLI is older; install the same version where you run lfr backup (curl -fsSL https://lfr.email/install.sh | sh) and run it again", e.Opts.Version)
+		}
+		return e.Backup(ctx, send)
+	})
 }
 
 func nonNil[T any](v []T, err error) (any, error) {

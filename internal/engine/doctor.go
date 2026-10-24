@@ -238,7 +238,7 @@ func ipList(addrs []net.IPAddr) string {
 
 // relayWebhookCheck distinguishes an unused endpoint from one that received valid notifications.
 func (e *Engine) relayWebhookCheck(ctx context.Context, url string) api.Check {
-	c := api.Check{Name: "relay webhooks", Status: "skip", Detail: "point bounce and complaint notifications at " + url + " (see lfr relay)"}
+	c := api.Check{Name: "relay webhooks", Status: "info", Detail: "configured, no notification yet; the relay should post bounces and complaints to " + url + " (see lfr relay)"}
 	v, _ := e.DB.Setting(ctx, "relay.last_hook", "")
 	at, provider, _ := strings.Cut(v, " ")
 	if when, err := time.Parse(time.RFC3339, at); err == nil {

@@ -131,7 +131,7 @@ type Status struct {
 // Check is one doctor result.
 type Check struct {
 	Name   string `json:"name"`
-	Status string `json:"status"` // ok, warn, fail, skip
+	Status string `json:"status"` // ok, info, warn, fail, skip
 	Detail string `json:"detail"`
 	Fix    string `json:"fix,omitempty"`
 }

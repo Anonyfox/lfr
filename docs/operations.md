@@ -103,7 +103,12 @@ machine. Restore only a backup that holds BACKUP-COMPLETE (written last): stop t
 directory back to `/var/lib/lfr` (owned by `lfr`).
 
 Upgrade: install the new binary (same command as installing), then `sudo systemctl restart lfr`.
-Migrations run on start; there is no downgrade.
+Upgrade the CLI on every machine that runs `lfr backup` or `--remote` too: a CLI older than 0.2.2
+cannot back up a 0.2.2 server and gets an error saying so.
+Migrations run on start; there is no downgrade. From 0.2.2 on, lfr refuses a database written by a
+newer version. Older binaries have no such guard: 0.2.1 and earlier open a newer database without a
+word. That is harmless for 0.2.2's schema 2 (they ignore the list_texts table, so text overrides are
+not applied), but it is not guaranteed for later schema changes.
 
 ## Troubleshooting
 

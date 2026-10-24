@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.3 (2026-10-24)
+
+- Backups need a CLI of the server's version. Since 0.2.2 the server streams the backup to the CLI,
+  so a CLI from 0.2.1 or older cannot back up a 0.2.2 server. Such a CLI now gets an error that says
+  so and how to upgrade; on 0.2.2 it failed without explaining why. Upgrade the CLI on every machine
+  that runs `lfr backup`, including the one that uses `--remote`.
+- `lfr backup --help` says the copy lands on the machine that runs the CLI, also with `--remote` or
+  `LFR_REMOTE`.
+- install.sh prints `sudo systemctl restart lfr` when it upgrades a server that already has the
+  systemd unit, instead of the setup hint.
+- `lfr doctor` reports a relay webhook that has not received anything as "info: configured, no
+  notification yet" instead of "skip".
+- docs/operations.md: going back below 0.2.2 is not guarded; those binaries open a newer database
+  without a check.
+- Release notes come from this file.
+
 ## 0.2.2 (2026-10-24)
 
 - `lfr doctor` reports the relay webhook as ok once a notification has arrived, with the provider and

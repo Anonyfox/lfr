@@ -89,4 +89,8 @@ case ":$PATH:" in
 *":$dir:"*) ;;
 *) say "$dir is not on PATH; add it, for example: export PATH=\"$dir:\$PATH\"" ;;
 esac
-say "next: sudo lfr setup --hostname mail.<your domain> --systemd"
+if [ -f /etc/systemd/system/lfr.service ]; then
+	say "next: sudo systemctl restart lfr (the server runs the old version until then)"
+else
+	say "next: sudo lfr setup --hostname mail.<your domain> --systemd"
+fi
