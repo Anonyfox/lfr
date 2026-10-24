@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.4 (2026-10-24)
+
+- Security: the release archives stored their files as uid and gid 1001 (the build machine's user),
+  and install.sh run as root kept that owner. On a server where uid 1001 is a real user, that user
+  could replace the binary the service runs as root. The archives now hold root-owned (0/0) entries,
+  and install.sh ignores the archive's owner and writes a binary owned by the installing user, root
+  under sudo. Running the new install.sh replaces a binary installed by 0.2.3 or older with a
+  root-owned one. CI checks both: archive entries and a root install from an archive owned by 1001.
+- install.sh suggests `lfr setup` only when it runs as root, and `--systemd` only where systemd runs.
+  A user install points to `LFR_REMOTE` for driving a server over ssh.
+- install.sh warns when another lfr of a different version comes first on PATH, with both paths and
+  versions.
+- lfr creates `sites/` and `certs/` in the data directory on start. A backup leaves out empty folders,
+  so a restored backup now gets the same layout as a fresh setup. Restores worked before too: lfr
+  creates `sites/` when the first site is uploaded.
+
 ## 0.2.3 (2026-10-24)
 
 - Backups need a CLI of the server's version. Since 0.2.2 the server streams the backup to the CLI,

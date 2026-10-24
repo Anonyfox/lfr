@@ -76,21 +76,39 @@ if fetch "$base/$archive" "$tmp/$archive" && fetch "$base/checksums.txt" "$tmp/c
 	want="$(grep " $archive\$" "$tmp/checksums.txt" | cut -d' ' -f1)"
 	[ -n "$want" ] || fail "checksums.txt has no entry for $archive"
 	[ "$(sha256 "$tmp/$archive")" = "$want" ] || fail "checksum mismatch for $archive; nothing installed"
-	tar -xzf "$tmp/$archive" -C "$tmp" lfr
-	mv "$tmp/lfr" "$dir/lfr.new"
-	chmod 755 "$dir/lfr.new"
-	mv "$dir/lfr.new" "$dir/lfr"
+	# Ignore the archive's owner, and write a new file so it belongs to the
+	# installing user (root for /usr/local/bin), not to the build machine's uid.
+	tar --no-same-owner -xzf "$tmp/$archive" -C "$tmp" lfr
+	rm -f "$dir/lfr.new"
+	install -m 755 "$tmp/lfr" "$dir/lfr.new"
+	if [ "$(id -u)" = 0 ]; then
+		chown 0:0 "$dir/lfr.new"
+	fi
+	mv -f "$dir/lfr.new" "$dir/lfr"
 elif ! go_install; then
 	fail "could not download $base/$archive, and Go 1.26 or newer is not available to build it"
 fi
 
-say "installed $("$dir/lfr" version) to $dir/lfr"
+installed="$("$dir/lfr" version)"
+say "installed $installed to $dir/lfr"
 case ":$PATH:" in
 *":$dir:"*) ;;
 *) say "$dir is not on PATH; add it, for example: export PATH=\"$dir:\$PATH\"" ;;
 esac
+found="$(command -v lfr || true)"
+if [ -n "$found" ] && [ "$found" != "$dir/lfr" ]; then
+	other="$("$found" version 2>/dev/null || echo "unknown version")"
+	if [ "$other" != "$installed" ]; then
+		say "warning: the shell runs $found ($other), not $dir/lfr ($installed), because it comes first on PATH; remove it or put $dir before it"
+	fi
+fi
 if [ -f /etc/systemd/system/lfr.service ]; then
 	say "next: sudo systemctl restart lfr (the server runs the old version until then)"
+elif [ "$(id -u)" = 0 ]; then
+	systemd=""
+	[ -d /run/systemd/system ] && systemd=" --systemd"
+	say "next, on a mail server: sudo lfr setup --hostname mail.<your domain>$systemd"
+	say "to drive an existing server from here instead: export LFR_REMOTE=user@your-server"
 else
-	say "next: sudo lfr setup --hostname mail.<your domain> --systemd"
+	say "next: export LFR_REMOTE=user@your-server to drive a server over ssh (on the server itself, install with sudo)"
 fi

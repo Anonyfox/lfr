@@ -13,7 +13,8 @@ sudo lfr setup --hostname mail.example.com --acme-email you@example.com --system
 
 Without sudo the script installs to `~/.local/bin`, which is enough on a machine that only drives a
 server over ssh. `lfr setup --systemd` needs it in `/usr/local/bin`, because the service cannot see
-home directories.
+home directories. The script warns when an older lfr comes first on PATH and would run instead.
+As root it installs a binary owned by root.
 
 The service runs as user `lfr`, may bind ports 25, 80 and 443, can write only `/var/lib/lfr`, and is
 capped at 400 MB. Add the user your agent runs as to the `lfr` group to use the CLI without sudo:
@@ -100,7 +101,9 @@ for a free Spamhaus DQS key and set `lfr config spam.dnsbl <key>.zen.dq.spamhaus
 into an empty directory while the server runs. The server streams it and the CLI writes and verifies
 it, so the directory can be any path the caller can write; with `--remote user@host` it lands on your
 machine. Restore only a backup that holds BACKUP-COMPLETE (written last): stop the service and copy the
-directory back to `/var/lib/lfr` (owned by `lfr`).
+directory back to `/var/lib/lfr` (owned by `lfr`). A backup leaves out empty folders (`sites/` without
+custom sites, `msg/` without messages) and TLS certificates; lfr recreates the folders on start and
+requests new certificates.
 
 Upgrade: install the new binary (same command as installing), then `sudo systemctl restart lfr`.
 Upgrade the CLI on every machine that runs `lfr backup` or `--remote` too: a CLI older than 0.2.2

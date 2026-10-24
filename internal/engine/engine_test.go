@@ -875,3 +875,25 @@ func TestBackupRefusesOldClients(t *testing.T) {
 		t.Fatalf("old client: %v", err)
 	}
 }
+
+// A backup skips empty folders; opening it as a data directory recreates them.
+func TestOpenRestoredBackup(t *testing.T) {
+	h := start(t)
+	dir := filepath.Join(t.TempDir(), "backup")
+	if _, err := backup.Receive(context.Background(), h.c, dir); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, SiteDir)); !os.IsNotExist(err) {
+		t.Fatalf("backup of a server without sites has %s: %v", SiteDir, err)
+	}
+	e, err := Open(context.Background(), Options{Data: dir, Version: "test", Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	for _, d := range []string{BlobDir, SiteDir, CertDir} {
+		if st, err := os.Stat(filepath.Join(dir, d)); err != nil || !st.IsDir() {
+			t.Errorf("restored data directory lacks %s: %v", d, err)
+		}
+	}
+}

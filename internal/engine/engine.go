@@ -114,6 +114,12 @@ func Open(ctx context.Context, o Options) (*Engine, error) {
 	if _, err := os.Stat(filepath.Join(o.Data, DBFile)); err != nil {
 		return nil, fmt.Errorf("no lfr data in %s: run lfr setup first", o.Data)
 	}
+	// A restored backup has no folders that were empty when it was taken.
+	for _, d := range []string{SiteDir, CertDir} {
+		if err := os.MkdirAll(filepath.Join(o.Data, d), 0o750); err != nil {
+			return nil, err
+		}
+	}
 	db, err := store.Open(ctx, filepath.Join(o.Data, DBFile))
 	if err != nil {
 		return nil, err
