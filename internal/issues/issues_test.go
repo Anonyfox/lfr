@@ -85,6 +85,7 @@ It smells of acetone because it ran out of food. [Feed it](https://example.com/f
 `
 
 func TestCreateSlugsAndFrontMatter(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	w, err := e.s.Create(ctx, "bakers", Draft{Markdown: sample})
@@ -112,6 +113,7 @@ func TestCreateSlugsAndFrontMatter(t *testing.T) {
 }
 
 func TestSendFlow(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	ls := e.s.Lists
@@ -168,14 +170,41 @@ func TestSendFlow(t *testing.T) {
 	}
 }
 
+// runOnce waits for due work to settle, including rows deferred to a later retry.
+// Join the runner before callers inspect the sink or advance the fixture clock.
 func runOnce(t *testing.T, e *env) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	defer cancel()
-	e.s.Queue.Run(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	done := make(chan error, 1)
+	go func() { done <- e.s.Queue.Run(ctx) }()
+	defer func() {
+		cancel()
+		if err := <-done; err != nil {
+			t.Errorf("queue runner: %v", err)
+		}
+	}()
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		var pending int
+		err := e.s.DB.R.QueryRowContext(ctx, `SELECT count(*) FROM outbound
+			WHERE status = 'sending' OR (status = 'queued' AND next_at <= ?)`, e.now.Unix()).Scan(&pending)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pending == 0 {
+			return
+		}
+		select {
+		case <-ctx.Done():
+			t.Fatalf("queue did not settle: %d due or sending rows", pending)
+		case <-tick.C:
+		}
+	}
 }
 
 func TestNoTrackingKeepsLinks(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	e.s.Lists.Update(ctx, "bakers", lists.Input{Tracking: ptr(false)})
@@ -192,6 +221,7 @@ func TestNoTrackingKeepsLinks(t *testing.T) {
 }
 
 func TestTestSendAndCancel(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	w, _ := e.s.Create(ctx, "bakers", Draft{Markdown: sample})
@@ -213,6 +243,7 @@ func TestTestSendAndCancel(t *testing.T) {
 }
 
 func TestLint(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	w, _ := e.s.Create(ctx, "bakers", Draft{Markdown: "# FREE STUFF FOR EVERYONE NOW\n\nAct now.\n\n![](/img.png)\n\n[here](/relative) [x](https://bit.ly/x) click here"})
@@ -241,6 +272,7 @@ func TestLint(t *testing.T) {
 }
 
 func TestSlugify(t *testing.T) {
+	t.Parallel()
 	for in, want := range map[string]string{"Hello, World!": "hello-world", "  Ça va?  ": "ca-va", "Äpfel & Öl": "aepfel-oel", "!!!": ""} {
 		if got := Slugify(in); got != want {
 			t.Errorf("Slugify(%q) = %q, want %q", in, got, want)
@@ -249,6 +281,7 @@ func TestSlugify(t *testing.T) {
 }
 
 func TestArchiveKeepsStats(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	e.s.Lists.Add(ctx, e.l, "a@x.org", "", true, lists.Signup{})
@@ -283,6 +316,7 @@ func FuzzFrontMatterAndSlug(f *testing.F) {
 }
 
 func TestPutTestedWelcomeAndGap(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	w, created, err := e.s.Put(ctx, "bakers", Draft{Markdown: sample, Slug: "starter-rescue"}, false)
@@ -358,6 +392,7 @@ func TestPutTestedWelcomeAndGap(t *testing.T) {
 }
 
 func TestFooterSaysWhy(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	m, _, err := e.s.Lists.Add(ctx, e.l, "ann@example.org", "", true, lists.Signup{Source: "web: https://news.example.com/starter"})
@@ -382,6 +417,7 @@ func TestFooterSaysWhy(t *testing.T) {
 // A postal address added after the issue was rendered reaches the send: the
 // render cache follows the list's settings.
 func TestFooterFollowsListChanges(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	m, _, _ := e.s.Lists.Add(ctx, e.l, "ann@example.org", "", true, lists.Signup{Source: "import"})
@@ -403,6 +439,7 @@ func TestFooterFollowsListChanges(t *testing.T) {
 
 // Only readers whose consent named open and click statistics are measured.
 func TestTrackingFollowsConsent(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	e.s.Lists.Add(ctx, e.l, "old@x.org", "", true, lists.Signup{Consent: "I want to receive Bakers Weekly by email."})
@@ -423,6 +460,7 @@ func TestTrackingFollowsConsent(t *testing.T) {
 // An issue whose slot passed long ago while the server was down waits for the
 // owner instead of going out days late.
 func TestMissedSlotWaits(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	e := setup(t)
 	e.s.Lists.Update(ctx, "bakers", lists.Input{Address: ptr("Bakers, Ofenweg 3, 10115 Berlin")})

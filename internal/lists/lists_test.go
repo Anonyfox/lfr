@@ -52,17 +52,22 @@ func TestCreateUpdate(t *testing.T) {
 	if !strings.Contains(l.ConsentText(), "Bakers Weekly per E-Mail") {
 		t.Fatal(l.ConsentText())
 	}
-	if _, err := s.Create(ctx, "bakers", Input{Name: ptr("x"), From: ptr("a@example.com")}); err == nil {
-		t.Fatal("duplicate slug")
-	}
-	if _, err := s.Create(ctx, "Bad Slug", Input{Name: ptr("x"), From: ptr("a@example.com")}); err == nil {
-		t.Fatal("bad slug")
-	}
-	if _, err := s.Create(ctx, "other", Input{Name: ptr("x"), From: ptr("a@unknown.org")}); !errors.Is(err, store.ErrNotFound) {
-		t.Fatal("unknown domain")
-	}
-	if _, err := s.Create(ctx, "other", Input{Name: ptr("x"), From: ptr("a@example.com"), Host: ptr("news.example.com")}); err == nil {
-		t.Fatal("host taken twice")
+	for _, tc := range []struct {
+		name, slug string
+		input      Input
+		wantErr    error
+	}{
+		{"duplicate slug", "bakers", Input{Name: ptr("x"), From: ptr("a@example.com")}, nil},
+		{"bad slug", "Bad Slug", Input{Name: ptr("x"), From: ptr("a@example.com")}, nil},
+		{"unknown domain", "other", Input{Name: ptr("x"), From: ptr("a@unknown.org")}, store.ErrNotFound},
+		{"host taken twice", "other", Input{Name: ptr("x"), From: ptr("a@example.com"), Host: ptr("news.example.com")}, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := s.Create(ctx, tc.slug, tc.input)
+			if err == nil || (tc.wantErr != nil && !errors.Is(err, tc.wantErr)) {
+				t.Fatalf("Create(%q): %v; want rejection (specific error: %v)", tc.slug, err, tc.wantErr)
+			}
+		})
 	}
 	l, err := s.Update(ctx, "bakers", Input{Tracking: ptr(true), ImprintURL: ptr("https://example.com/impressum"), From: ptr("hello@example.com")})
 	if err != nil || !l.Tracking || l.From != "hello@example.com" {
@@ -167,7 +172,8 @@ func TestCheckHealthPauses(t *testing.T) {
 	var issueID int64
 	res, _ := s.DB.W.Exec("INSERT INTO issues(list_id, slug, subject, markdown, status, created, updated) VALUES(?, 'w', 's', 'm', 'sent', 0, 0)", l.ID)
 	issueID, _ = res.LastInsertId()
-	for i := 0; i < 300; i++ {
+	// Reach the health threshold without creating unnecessary readers.
+	for i := 0; i < minSentForHealth; i++ {
 		m, _, _ := s.Add(ctx, l, fmt.Sprintf("r%d@x.org", i), "", true, Signup{})
 		s.DB.W.Exec("INSERT INTO outbound(kind, domain_id, issue_id, contact_id, env_from, rcpt, status, next_at, created) VALUES('issue', ?, ?, ?, '', ?, 'sent', 0, ?)",
 			l.DomainID, issueID, m.ContactID, m.Email, c.Now().Unix())
