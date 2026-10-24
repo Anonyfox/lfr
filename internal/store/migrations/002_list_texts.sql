@@ -1,0 +1,6 @@
+CREATE TABLE list_texts (
+ list_id INTEGER NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+ key TEXT NOT NULL,
+ value TEXT NOT NULL,
+ PRIMARY KEY(list_id, key)
+) STRICT;

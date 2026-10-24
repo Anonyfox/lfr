@@ -45,12 +45,14 @@ const (
 	OpWatch          = "watch"
 	OpEvents         = "events.list"
 
-	OpListAdd    = "list.add"
-	OpListList   = "list.list"
-	OpListShow   = "list.show"
-	OpListSet    = "list.set"
-	OpListRemove = "list.remove"
-	OpListPause  = "list.pause"
+	OpListAdd     = "list.add"
+	OpListList    = "list.list"
+	OpListText    = "list.text"
+	OpListTextSet = "list.text.set"
+	OpListShow    = "list.show"
+	OpListSet     = "list.set"
+	OpListRemove  = "list.remove"
+	OpListPause   = "list.pause"
 
 	OpSubAdd        = "sub.add"
 	OpSubList       = "sub.list"
@@ -480,9 +482,22 @@ type Report struct {
 	Rows     json.RawMessage `json:"rows,omitempty"` // the report's rows as the reporter sent them
 }
 
-// Backup writes a copy of the data directory.
-type Backup struct {
-	Dir string `json:"dir"`
+// ListTexts changes a validated batch of reader texts.
+type ListTexts struct {
+	Slug   string            `json:"slug"`
+	Values map[string]string `json:"values"`
+}
+
+// BackupFrame carries one bounded chunk, file terminator, or final summary.
+type BackupFrame struct {
+	Path     string        `json:"path,omitempty"`
+	Offset   int64         `json:"offset,omitempty"`
+	Data     []byte        `json:"data,omitempty"`
+	End      bool          `json:"end,omitempty"`
+	Size     int64         `json:"size,omitempty"`
+	SHA256   string        `json:"sha256,omitempty"`
+	Summary  *BackupResult `json:"summary,omitempty"`
+	Complete string        `json:"complete,omitempty"`
 }
 
 // BackupResult reports the backup.

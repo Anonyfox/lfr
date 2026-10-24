@@ -69,6 +69,8 @@ type Options struct {
 
 // Engine is a running lfr.
 type Engine struct {
+	backupMu sync.Mutex // serializes backups and excludes blob garbage collection
+
 	unsubLinks map[int64]time.Time // member → when an unsubscribe link last went out by mail
 
 	Opts     Options

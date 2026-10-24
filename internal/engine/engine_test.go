@@ -2,8 +2,11 @@ package engine
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/Anonyfox/lfr/internal/store"
 	"io"
 	"log/slog"
 	"net"
@@ -21,6 +24,7 @@ import (
 	"github.com/emersion/go-smtp"
 
 	"github.com/Anonyfox/lfr/internal/api"
+	"github.com/Anonyfox/lfr/internal/backup"
 	"github.com/Anonyfox/lfr/internal/ctl"
 	"github.com/Anonyfox/lfr/internal/dnsx/dnsxtest"
 	"github.com/Anonyfox/lfr/internal/inbound"
@@ -606,12 +610,61 @@ func TestFeedbackAndBackup(t *testing.T) {
 		t.Fatalf("authenticated complaint report ignored: %+v", c)
 	}
 
+	siteFile := filepath.Join(h.e.Opts.Data, SiteDir, "bakers", "asset.txt")
+	if err := os.MkdirAll(filepath.Dir(siteFile), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	siteContent := strings.Repeat("site asset\n", 30000)
+	if err := os.WriteFile(siteFile, []byte(siteContent), 0o640); err != nil {
+		t.Fatal(err)
+	}
 	dir := filepath.Join(t.TempDir(), "backup")
-	var b api.BackupResult
-	h.call(t, api.OpBackup, api.Backup{Dir: dir}, &b)
+	b, berr := backup.Receive(context.Background(), h.c, dir)
+	if berr != nil {
+		t.Fatal(berr)
+	}
 	if _, err := os.Stat(filepath.Join(dir, BackupDone)); err != nil || b.Blobs == 0 {
 		t.Fatalf("backup %+v %v", b, err)
 	}
+	copied, err := os.ReadFile(filepath.Join(dir, SiteDir, "bakers", "asset.txt"))
+	if err != nil || string(copied) != siteContent {
+		t.Fatalf("site file: %v", err)
+	}
+	snapshot, err := store.Open(context.Background(), filepath.Join(dir, DBFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var integrity string
+	if err := snapshot.R.QueryRow("PRAGMA integrity_check").Scan(&integrity); err != nil || integrity != "ok" {
+		t.Fatalf("snapshot integrity %s %v", integrity, err)
+	}
+	snapshot.Close()
+	count := 0
+	err = filepath.WalkDir(filepath.Join(dir, BlobDir), func(p string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		if fmt.Sprintf("%x.eml", sha256.Sum256(raw)) != d.Name() {
+			t.Fatalf("blob hash %s", p)
+		}
+		count++
+		return nil
+	})
+	if err != nil || count != b.Blobs {
+		t.Fatalf("blobs %d/%d: %v", count, b.Blobs, err)
+	}
+	leftovers, err := filepath.Glob(filepath.Join(h.e.Opts.Data, ".backup-*"))
+	if err != nil || len(leftovers) != 0 {
+		t.Fatalf("snapshot leftovers %v %v", leftovers, err)
+	}
+
 }
 
 // Mail between the server's own domains is delivered on the spot: it never
@@ -744,5 +797,72 @@ func TestUnsubscribedRetention(t *testing.T) {
 	}
 	if count != 3 {
 		t.Fatalf("members: %d", count)
+	}
+}
+
+func TestListTextOverrides(t *testing.T) {
+	h := start(t)
+	var dom api.DomainInfo
+	h.call(t, api.OpDomainAdd, api.Name{Name: "example.com"}, &dom)
+	h.publish(t, dom)
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "nieuws", ListFields: api.ListFields{
+		Name: strPtr("Nieuws"), From: strPtr("news@example.com"), Host: strPtr("nieuws.example.com"),
+		Language: strPtr("nl"), Address: strPtr("Nieuws, Straat 1, Amsterdam"),
+	}}, nil)
+	overrides := map[string]string{
+		"confirm.subject": "Bevestig uw abonnement op %s",
+		"confirm.intro":   "U vroeg om %s.",
+		"confirm.action":  "Ja, schrijf mij in",
+		"form.email":      "E-mailadres", "form.submit": "Aanmelden",
+		"form.consent":         "Ik ontvang %s en kan mij altijd afmelden.",
+		"page.check.title":     "Controleer uw inbox",
+		"page.confirm.title":   "Bevestig uw inschrijving",
+		"page.confirm.body":    "U ontvangt %s.",
+		"page.confirmed.title": "U bent ingeschreven",
+		"page.unsub.title":     "Afmelden",
+		"page.unsub.body":      "Geen %s meer ontvangen?",
+		"page.unsub.action":    "Schrijf mij uit",
+		"page.unsubbed.title":  "U bent uitgeschreven",
+		"footer.unsub":         "Afmelden", "date": "2006-01-02",
+	}
+	h.call(t, api.OpListTextSet, api.ListTexts{Slug: "nieuws", Values: overrides}, nil)
+	check := func(method, url, body, want string) {
+		t.Helper()
+		r := h.web(method, url, body)
+		if r.Code != 200 || !strings.Contains(r.Body.String(), want) {
+			t.Fatalf("%s %s: %d %s", method, url, r.Code, r.Body.String())
+		}
+	}
+	check("GET", "https://nieuws.example.com/", "", "E-mailadres")
+	check("POST", "https://nieuws.example.com/subscribe", url.Values{"email": {"reader@mail.org"}}.Encode(), "Controleer uw inbox")
+	mail := msg.Parse(h.sink.wait(t, "reader@mail.org", 1)[0].raw)
+	if mail.Subject != "Bevestig uw abonnement op Nieuws" || !strings.Contains(mail.Text, "U vroeg om Nieuws.") {
+		t.Fatalf("DOI: %+v", mail)
+	}
+	link := linkRE.FindString(mail.Text)
+	check("GET", link, "", "Bevestig uw inschrijving")
+	check("POST", link, "", "U bent ingeschreven")
+	var issue issues.Issue
+	h.call(t, api.OpIssueCreate, api.IssueDraft{List: "nieuws", Markdown: "# Nieuws vandaag\n\nEen bericht.\n"}, &issue)
+	h.call(t, api.OpIssueSend, api.IssueSend{IssueRef: api.IssueRef{ID: issue.ID}, Force: true}, nil)
+	newsletter := msg.Parse(h.sink.wait(t, "reader@mail.org", 2)[1].raw)
+	unsub := strings.Trim(strings.Split(newsletter.Header.Get("List-Unsubscribe"), ",")[0], "<> ")
+	check("GET", unsub, "", "Schrijf mij uit")
+	check("POST", unsub, "", "U bent uitgeschreven")
+	// The next list load reflects resets; no stale text cache survives.
+	h.call(t, api.OpListTextSet, api.ListTexts{Slug: "nieuws", Values: map[string]string{"form.email": ""}}, nil)
+	check("GET", "https://nieuws.example.com/", "", "Email address")
+}
+
+func TestBackupCancellationRemovesSnapshot(t *testing.T) {
+	h := start(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	err := h.e.Backup(ctx, func(any) error { cancel(); return context.Canceled })
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancel: %v", err)
+	}
+	leftovers, err := filepath.Glob(filepath.Join(h.e.Opts.Data, ".backup-*"))
+	if err != nil || len(leftovers) != 0 {
+		t.Fatalf("snapshot leftovers %v %v", leftovers, err)
 	}
 }

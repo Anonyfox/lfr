@@ -15,7 +15,6 @@ import (
 	"github.com/Anonyfox/lfr/internal/emailmd"
 	"github.com/Anonyfox/lfr/internal/events"
 	"github.com/Anonyfox/lfr/internal/feedback"
-	"github.com/Anonyfox/lfr/internal/i18n"
 	"github.com/Anonyfox/lfr/internal/inbound"
 	"github.com/Anonyfox/lfr/internal/lists"
 	"github.com/Anonyfox/lfr/internal/mailbox"
@@ -409,12 +408,12 @@ func (e *Engine) buildConfirm(ctx context.Context, r outbound.Row) ([]byte, erro
 	// signup, an old confirmation mail confirms nothing.
 	link := e.BaseURL(l) + "/confirm/" + e.Tokens.Make(token.Confirm, m.ID, m.SignupAt.Unix())
 	lang := l.Language
-	intro := fmt.Sprintf(i18n.T(lang, "confirm.intro"), l.Name)
-	action := i18n.T(lang, "confirm.action")
-	ignore := i18n.T(lang, "confirm.ignore")
+	intro := fmt.Sprintf(l.Text("confirm.intro"), l.Name)
+	action := l.Text("confirm.action")
+	ignore := l.Text("confirm.ignore")
 	expect := ""
 	if l.Cadence != "" {
-		expect = fmt.Sprintf(i18n.T(lang, "confirm.cadence"), l.Cadence)
+		expect = fmt.Sprintf(l.Text("confirm.cadence"), l.Cadence)
 	}
 	md := intro + "\n\n[" + action + " →](" + link + ")\n\n" + expect + ignore
 	doc, _ := emailmd.Render(md)
@@ -423,9 +422,9 @@ func (e *Engine) buildConfirm(ctx context.Context, r outbound.Row) ([]byte, erro
 		footer += "<br>" + template.HTMLEscapeString(l.Address)
 	}
 	if l.ImprintURL != "" {
-		footer += `<br><a href="` + template.HTMLEscapeString(l.ImprintURL) + `" style="color:#52525b;">` + i18n.T(lang, "footer.imprint") + "</a>"
+		footer += `<br><a href="` + template.HTMLEscapeString(l.ImprintURL) + `" style="color:#52525b;">` + template.HTMLEscapeString(l.Text("footer.imprint")) + "</a>"
 	}
-	html, err := emailmd.Email(emailmd.Layout{Lang: lang, Title: fmt.Sprintf(i18n.T(lang, "confirm.subject"), l.Name), Brand: l.Name,
+	html, err := emailmd.Email(emailmd.Layout{Lang: lang, Title: fmt.Sprintf(l.Text("confirm.subject"), l.Name), Brand: l.Name,
 		Body: template.HTML(emailmd.Inline(doc.HTML, emailmd.DefaultTheme)), FooterHTML: template.HTML(footer)})
 	if err != nil {
 		return nil, err
@@ -436,7 +435,7 @@ func (e *Engine) buildConfirm(ctx context.Context, r outbound.Row) ([]byte, erro
 	}
 	return msg.Compose(msg.Draft{
 		From: msg.Address{Name: l.FromName, Email: l.From}, To: []msg.Address{{Email: m.Email}},
-		Subject: fmt.Sprintf(i18n.T(lang, "confirm.subject"), l.Name), Date: e.Opts.Now(),
+		Subject: fmt.Sprintf(l.Text("confirm.subject"), l.Name), Date: e.Opts.Now(),
 		MessageID: e.Tokens.Make(token.Message, r.ID) + ".c@" + l.Domain,
 		Text:      text, HTML: html,
 		Header: [][2]string{{"Auto-Submitted", "auto-generated"}, {"Form-Sub", formSub(m.SignupIP)}},
@@ -511,10 +510,9 @@ func (e *Engine) sendUnsubLink(ctx context.Context, l *lists.List, m *lists.Memb
 	e.unsubLinks[m.ID] = now
 	e.mu.Unlock()
 	link := e.BaseURL(l) + "/u/" + e.Tokens.Make(token.Unsub, m.ID, 0)
-	lang := l.Language
 	_, err := e.Mailbox.Send(ctx, e.Queue, mailbox.SendRequest{From: l.From, To: []string{m.Email},
-		Subject: fmt.Sprintf(i18n.T(lang, "unsub.reply.subject"), l.Name),
-		Text:    fmt.Sprintf(i18n.T(lang, "unsub.reply.body"), l.Name, link)})
+		Subject: fmt.Sprintf(l.Text("unsub.reply.subject"), l.Name),
+		Text:    fmt.Sprintf(l.Text("unsub.reply.body"), l.Name, link)})
 	if err != nil {
 		e.Log.Warn("unsubscribe link by mail", "list", l.Slug, "err", err)
 	}

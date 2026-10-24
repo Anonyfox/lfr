@@ -8,13 +8,16 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/Anonyfox/lfr/internal/api"
 	"github.com/Anonyfox/lfr/internal/concept"
 	"github.com/Anonyfox/lfr/internal/craft"
+	"github.com/Anonyfox/lfr/internal/ctl"
 	"github.com/Anonyfox/lfr/internal/dnsx/dnsxtest"
 	"github.com/Anonyfox/lfr/internal/engine"
 	"github.com/Anonyfox/lfr/internal/project"
@@ -150,6 +153,13 @@ func TestRemote(t *testing.T) {
 	if code, out, _ := run(t, env, "", "domain", "ls", "--json"); code != 0 || !strings.Contains(out, `"example.com"`) {
 		t.Fatalf("remote json: %d %s", code, out)
 	}
+	target := filepath.Join(t.TempDir(), "remote-backup")
+	if code, out, errs := run(t, env, "", "backup", target, "--json"); code != 0 || !strings.Contains(out, target) {
+		t.Fatalf("remote backup: %d %s %s", code, out, errs)
+	}
+	if _, err := os.Stat(filepath.Join(target, "BACKUP-COMPLETE")); err != nil {
+		t.Fatal(err)
+	}
 	env["LFR_REMOTE_DATA"] = "/nonexistent-lfr"
 	if code, _, errs := run(t, env, "", "status"); code != ExitNotRunning || !strings.Contains(errs, "no server is running on ana@vps") {
 		t.Fatalf("remote not running: %d %s", code, errs)
@@ -169,6 +179,12 @@ func TestAgainstServer(t *testing.T) {
 		{"", []string{"mailbox", "add", "jo@example.com", "--name", "Jo"}, "Created jo@example.com", 0},
 		{"", []string{"mailbox", "ls"}, "jo@example.com", 0},
 		{"", []string{"list", "add", "news", "--name", "News", "--from", "news@example.com", "--address", "News, Weg 1, 10115 Berlin"}, "/lists/news/", 0},
+		{"", []string{"list", "set", "news", "--language", "nl"}, "lfr list text news --import nl.json", 0},
+		{"{\"confirm.subject\":\"Bevestig %s\",\"form.submit\":\"Aanmelden\"}", []string{"list", "text", "news", "--import", "-"}, "Aanmelden", 0},
+		{"", []string{"list", "text", "news", "confirm.subject", "Bevestigen %s"}, "Bevestigen %s", 0},
+		{"{\"form.submit\":\"SHOULD NOT APPLY\",\"confirm.subject\":\"missing placeholder\"}", []string{"list", "text", "news", "--import", "-"}, "", 2},
+		{"", []string{"list", "text", "news", "--json"}, "\"Aanmelden\"", 0},
+		{"", []string{"list", "text", "news", "confirm.subject", "--reset"}, "Please confirm", 0},
 		{"", []string{"reader", "add", "news", "a@x.org", "--confirmed", "--consent", "Old form"}, "1 added", 0},
 		{"email\nb@x.org\n", []string{"reader", "add", "news", "--csv", "-", "--confirmed", "--consent", "Old form"}, "1 added", 0},
 		{"", []string{"reader", "ls", "news", "--csv"}, "b@x.org", 0},
@@ -195,9 +211,16 @@ func TestAgainstServer(t *testing.T) {
 	}
 	for _, s := range steps {
 		code, out, errs := run(t, env, s.stdin, s.args...)
-		if code != s.code || !strings.Contains(out, s.want) {
+		if code != s.code || !strings.Contains(out+errs, s.want) {
 			t.Errorf("lfr %s: exit %d (want %d)\n%s%s", strings.Join(s.args, " "), code, s.code, out, errs)
 		}
+	}
+	backupDir := filepath.Join(t.TempDir(), "backup")
+	if code, out, errs := run(t, env, "", "backup", backupDir, "--json"); code != 0 || !strings.Contains(out, backupDir) {
+		t.Fatalf("backup: %d %s %s", code, out, errs)
+	}
+	if _, err := os.Stat(filepath.Join(backupDir, "BACKUP-COMPLETE")); err != nil {
+		t.Fatal(err)
 	}
 	code, out, _ := run(t, env, "", "mailbox", "ls", "--json")
 	var boxes []map[string]any
@@ -296,5 +319,74 @@ func TestJSONErrors(t *testing.T) {
 		if err := json.Unmarshal([]byte(out), &got); err != nil || code != c.exit || got.Exit != c.exit || got.Code != c.code || got.Error == "" || got.Next == "" {
 			t.Errorf("%v: exit %d, stdout %q", c.args, code, out)
 		}
+	}
+}
+
+func TestBackupRejectsEscapingFrame(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	dir, err := os.MkdirTemp("/tmp", "lfr-bad-backup")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	listener, err := net.Listen("unix", filepath.Join(dir, "lfr.sock"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	server := &ctl.Server{Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	server.Stream(api.OpBackup, func(_ context.Context, _ json.RawMessage, send func(any) error) error {
+		return send(api.BackupFrame{Path: "../escape", Data: []byte("bad")})
+	})
+	go server.Serve(ctx, listener)
+	target := filepath.Join(t.TempDir(), "backup")
+	code, _, errs := run(t, map[string]string{"LFR_DATA": dir}, "", "backup", target)
+	if code == 0 || !strings.Contains(errs, "incomplete") {
+		t.Fatalf("%d %s", code, errs)
+	}
+	if _, err := os.Stat(filepath.Join(target, "BACKUP-COMPLETE")); !os.IsNotExist(err) {
+		t.Fatal("completion marker exists")
+	}
+	if _, err := os.Stat(filepath.Join(filepath.Dir(target), "escape")); !os.IsNotExist(err) {
+		t.Fatal("escaped file exists")
+	}
+}
+
+func TestBackupCancellationReportsIncomplete(t *testing.T) {
+	serverCtx, stop := context.WithCancel(context.Background())
+	defer stop()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	dir, err := os.MkdirTemp("/tmp", "lfr-cancel-backup")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	listener, err := net.Listen("unix", filepath.Join(dir, "lfr.sock"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	server := &ctl.Server{Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	server.Stream(api.OpBackup, func(_ context.Context, _ json.RawMessage, send func(any) error) error {
+		err := send(api.BackupFrame{Path: "lfr.db", Data: []byte("partial")})
+		cancel()
+		return err
+	})
+	go server.Serve(serverCtx, listener)
+	target := filepath.Join(t.TempDir(), "backup")
+	var out, errs bytes.Buffer
+	code := Run(ctx, Env{Stdout: &out, Stderr: &errs, Getenv: func(k string) string {
+		if k == "LFR_DATA" {
+			return dir
+		}
+		return ""
+	}}, []string{"backup", target, "--json"})
+	if code != ExitInterrupt || !strings.Contains(errs.String(), "incomplete") || !strings.Contains(out.String(), "\"interrupted\"") {
+		t.Fatalf("%d %s %s", code, &out, &errs)
+	}
+	if _, err := os.Stat(filepath.Join(target, "BACKUP-COMPLETE")); !os.IsNotExist(err) {
+		t.Fatal("completion marker exists")
 	}
 }

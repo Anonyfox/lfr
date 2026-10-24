@@ -6,6 +6,7 @@ package lists
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/Anonyfox/lfr/internal/addr"
 	"github.com/Anonyfox/lfr/internal/events"
-	"github.com/Anonyfox/lfr/internal/i18n"
 	"github.com/Anonyfox/lfr/internal/store"
 )
 
@@ -46,6 +46,9 @@ type List struct {
 	Confirmed    int       `json:"confirmed"`
 	Pending      int       `json:"pending"`
 	Unsubscribed int       `json:"unsubscribed"`
+
+	// Texts is loaded with the list in the same query.
+	Texts map[string]string `json:"texts,omitempty"`
 }
 
 // Seconds is a duration stored and shown in whole seconds.
@@ -64,9 +67,9 @@ func (l *List) ConsentText() string {
 		return l.Consent
 	}
 	if l.Tracking {
-		return fmt.Sprintf(i18n.T(l.Language, "form.consent.tracked"), l.Name)
+		return fmt.Sprintf(l.Text("form.consent.tracked"), l.Name)
 	}
-	return fmt.Sprintf(i18n.T(l.Language, "form.consent"), l.Name)
+	return fmt.Sprintf(l.Text("form.consent"), l.Name)
 }
 
 // ConsentsToTracking reports whether a consent text tells readers about open
@@ -104,21 +107,27 @@ const selectList = `SELECT l.id, l.domain_id, d.name, l.slug, l.name, l.descript
 	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created,
 	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'confirmed'),
 	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'pending'),
-	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'unsubscribed')
+	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'unsubscribed'),
+	(SELECT json_group_object(key, value) FROM list_texts WHERE list_id = l.id)
 	FROM lists l JOIN domains d ON d.id = l.domain_id`
 
 // selectListLight skips the member counts, for lookups on hot paths
 // (every web request, every recipient of an issue).
 const selectListLight = `SELECT l.id, l.domain_id, d.name, l.slug, l.name, l.description, l.from_local || '@' || d.name, l.from_name, l.reply_to, l.host,
-	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created, 0, 0, 0
+	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created, 0, 0, 0,
+	(SELECT json_group_object(key, value) FROM list_texts WHERE list_id = l.id)
 	FROM lists l JOIN domains d ON d.id = l.domain_id`
 
 func scanList(row interface{ Scan(...any) error }) (*List, error) {
 	var l List
 	var created int64
+	var texts string
 	err := row.Scan(&l.ID, &l.DomainID, &l.Domain, &l.Slug, &l.Name, &l.Description, &l.From, &l.FromName, &l.ReplyTo, &l.Host,
 		&l.Language, &l.Tracking, &l.ImprintURL, &l.PrivacyURL, &l.Address, &l.Consent, &l.Paused, &l.Cadence, &l.Headline, &l.Pitch, &l.oldHosts, &l.MinGap, &created,
-		&l.Confirmed, &l.Pending, &l.Unsubscribed)
+		&l.Confirmed, &l.Pending, &l.Unsubscribed, &texts)
+	if err == nil {
+		err = json.Unmarshal([]byte(texts), &l.Texts)
+	}
 	l.Created = time.Unix(created, 0).UTC()
 	return &l, err
 }

@@ -16,7 +16,6 @@ import (
 
 	"github.com/Anonyfox/lfr/internal/emailmd"
 	"github.com/Anonyfox/lfr/internal/finding"
-	"github.com/Anonyfox/lfr/internal/i18n"
 	"github.com/Anonyfox/lfr/internal/lists"
 	"github.com/Anonyfox/lfr/internal/msg"
 	"github.com/Anonyfox/lfr/internal/outbound"
@@ -93,6 +92,9 @@ func (r *Renderer) prepare(l *lists.List, w *Issue) (*prepared, error) {
 	var key strings.Builder
 	fmt.Fprintf(&key, "%q|%q|%q|%q|%q|%q|%q|%t|%q|%q|%q|%q|%q;", l.Name, l.Domain, l.Slug, l.From, l.FromName, l.ReplyTo, l.Host,
 		l.Tracking, l.Language, l.ImprintURL, l.PrivacyURL, l.Address, l.Cadence)
+	for _, k := range slices.Sorted(maps.Keys(l.Texts)) {
+		fmt.Fprintf(&key, "%q=%q;", k, l.Texts[k])
+	}
 	key.WriteString(r.ListURL(l) + ";")
 	for _, path := range slices.Sorted(maps.Keys(media)) {
 		key.WriteString(path + "=" + media[path].Hash + ";")
@@ -131,7 +133,7 @@ func (r *Renderer) prepare(l *lists.List, w *Issue) (*prepared, error) {
 		body = emailmd.RewriteLinks(body, func(i int, _ string) string { return phClick(i) })
 	}
 	lang := l.Language
-	footer := footerHTML(l, lang, r.ListURL(l), !w.Welcome)
+	footer := footerHTML(l, r.ListURL(l), !w.Welcome)
 	layout := emailmd.Layout{
 		Lang: lang, Title: w.Subject, Preheader: w.Preheader, Brand: l.Name, BrandURL: r.ListURL(l),
 		Body: template.HTML(body), FooterHTML: template.HTML(footer), Theme: emailmd.DefaultTheme,
@@ -151,7 +153,7 @@ func (r *Renderer) prepare(l *lists.List, w *Issue) (*prepared, error) {
 	}
 	p := &prepared{
 		updated: w.Updated, key: key.String(), missing: missing, heavy: heavy, links: doc.Links, html: out,
-		text: textPreheader(w.Preheader) + emailmd.Text(w.Markdown) + "\n\n-- \n" + footerText(l, lang, r.ListURL(l), !w.Welcome),
+		text: textPreheader(w.Preheader) + emailmd.Text(w.Markdown) + "\n\n-- \n" + footerText(l, r.ListURL(l), !w.Welcome),
 		web:  emailmd.MarkButtons(doc.HTML),
 	}
 	r.mu.Lock()
@@ -172,44 +174,44 @@ func (r *Renderer) layout(l *lists.List) *template.Template {
 
 // footerHTML is the legal footer. web links the issue's archive page, which
 // the welcome issue does not have.
-func footerHTML(l *lists.List, lang, listURL string, web bool) string {
+func footerHTML(l *lists.List, listURL string, web bool) string {
 	esc := html.EscapeString
 	link := func(href, text string) string {
 		return `<a href="` + href + `" style="color:` + footerMuted + `;text-decoration:underline;">` + esc(text) + `</a>`
 	}
 	var b strings.Builder
 	b.WriteString(`<p style="margin:0 0 8px;">` + phWhy + `</p>`)
-	b.WriteString(`<p style="margin:0 0 8px;">` + link(phUnsub, i18n.T(lang, "footer.unsub")))
+	b.WriteString(`<p style="margin:0 0 8px;">` + link(phUnsub, l.Text("footer.unsub")))
 	if web {
-		b.WriteString(" · " + link(phWeb, i18n.T(lang, "footer.web")))
+		b.WriteString(" · " + link(phWeb, l.Text("footer.web")))
 	}
 	if l.ImprintURL != "" {
-		b.WriteString(" · " + link(esc(l.ImprintURL), i18n.T(lang, "footer.imprint")))
+		b.WriteString(" · " + link(esc(l.ImprintURL), l.Text("footer.imprint")))
 	}
 	if l.PrivacyURL != "" {
-		b.WriteString(" · " + link(esc(l.PrivacyURL), i18n.T(lang, "footer.privacy")))
+		b.WriteString(" · " + link(esc(l.PrivacyURL), l.Text("footer.privacy")))
 	}
 	b.WriteString("</p>")
 	host := strings.TrimPrefix(strings.TrimPrefix(listURL, "https://"), "http://")
-	b.WriteString(`<p style="margin:0 0 8px;">` + fmt.Sprintf(esc(i18n.T(lang, "footer.forwarded")), link(esc(listURL)+"/", host)) + `</p>`)
+	b.WriteString(`<p style="margin:0 0 8px;">` + fmt.Sprintf(esc(l.Text("footer.forwarded")), link(esc(listURL)+"/", host)) + `</p>`)
 	if l.Address != "" {
 		b.WriteString(`<p style="margin:0;">` + strings.ReplaceAll(esc(l.Address), "\n", "<br>") + `</p>`)
 	}
 	return b.String()
 }
 
-func footerText(l *lists.List, lang, listURL string, web bool) string {
-	lines := []string{phWhy, i18n.T(lang, "footer.unsub") + ": " + phUnsub}
+func footerText(l *lists.List, listURL string, web bool) string {
+	lines := []string{phWhy, l.Text("footer.unsub") + ": " + phUnsub}
 	if web {
-		lines = append(lines, i18n.T(lang, "footer.web")+": "+phWeb)
+		lines = append(lines, l.Text("footer.web")+": "+phWeb)
 	}
 	if l.ImprintURL != "" {
-		lines = append(lines, i18n.T(lang, "footer.imprint")+": "+l.ImprintURL)
+		lines = append(lines, l.Text("footer.imprint")+": "+l.ImprintURL)
 	}
 	if l.PrivacyURL != "" {
-		lines = append(lines, i18n.T(lang, "footer.privacy")+": "+l.PrivacyURL)
+		lines = append(lines, l.Text("footer.privacy")+": "+l.PrivacyURL)
 	}
-	lines = append(lines, fmt.Sprintf(i18n.T(lang, "footer.forwarded"), listURL+"/"))
+	lines = append(lines, fmt.Sprintf(l.Text("footer.forwarded"), listURL+"/"))
 	if l.Address != "" {
 		lines = append(lines, l.Address)
 	}
@@ -219,15 +221,14 @@ func footerText(l *lists.List, lang, listURL string, web bool) string {
 // why tells a reader how they came onto the list: readers who remember
 // signing up unsubscribe instead of reporting spam (lfr:V004, lfr:V092).
 func why(l *lists.List, rc Recipient) string {
-	lang := l.Language
 	if rc.SignupAt.IsZero() {
-		return fmt.Sprintf(i18n.T(lang, "footer.why"), l.Name)
+		return fmt.Sprintf(l.Text("footer.why"), l.Name)
 	}
-	day := rc.SignupAt.UTC().Format(i18n.T(lang, "date"))
+	day := rc.SignupAt.UTC().Format(l.Text("date"))
 	if place := signupPlace(rc.Source, l); place != "" {
-		return fmt.Sprintf(i18n.T(lang, "footer.since.at"), l.Name, day, place)
+		return fmt.Sprintf(l.Text("footer.since.at"), l.Name, day, place)
 	}
-	return fmt.Sprintf(i18n.T(lang, "footer.since"), l.Name, day)
+	return fmt.Sprintf(l.Text("footer.since"), l.Name, day)
 }
 
 // signupPlace is the host a web signup came from, or "".

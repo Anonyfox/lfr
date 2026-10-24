@@ -28,7 +28,7 @@ complaints cross 0.3%. This skill sets up the rest.
 ## 1. The list
 
 ```
-lfr list add <slug> --from <name>@<domain> --name "<newsletter>" --language <en|de> --host <news.domain>
+lfr list add <slug> --from <name>@<domain> --name "<newsletter>" --language <language> --host <news.domain>
 ```
 
 - The slug is the one in [[.Project.Config]].
@@ -39,6 +39,11 @@ lfr list add <slug> --from <name>@<domain> --name "<newsletter>" --language <en|
   `--from-name` when it differs from the list name.
 - `--host` gives the list its own website (archive, signup, feed); point the name at the server
   (`lfr domain dns <domain>` lists the record). Without it the site lives under the mail host.
+- English and informal German ("du") are built in; any other language falls back to English until you
+  override the texts. `lfr list text <slug>` shows every reader text. One key:
+  `lfr list text <slug> confirm.subject 'Bitte bestätigen Sie Ihr Abonnement von %s'`; a whole language:
+  `lfr list text <slug> --import <file>` with a flat JSON object of keys and texts. Keep the `%s`
+  placeholders in order; an empty text or `--reset` restores the built-in one.
 - Tracking stays off unless the owner wants it and the consent text covers it (lfr:E039, lfr:E043).
   Opens are unreliable anyway (lfr:E091, lfr:E094); lfr counts clicks and replies.
 

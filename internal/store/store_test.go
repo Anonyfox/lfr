@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -81,6 +82,27 @@ func TestFTSContentless(t *testing.T) {
 		t.Fatalf("match = %d, %v", id, err)
 	}
 	if _, err := db.W.Exec("DELETE FROM messages_fts WHERE rowid = 7"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRefuseNewerSchema(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "lfr.db")
+	db, err := Open(ctx, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.W.Exec("PRAGMA user_version=999"); err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	db, err = Open(ctx, path)
+	if err == nil {
+		db.Close()
+		t.Fatal("opened newer schema")
+	}
+	if !strings.Contains(err.Error(), "written by a newer lfr") || !strings.Contains(err.Error(), "install that version") {
 		t.Fatal(err)
 	}
 }

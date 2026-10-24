@@ -97,7 +97,9 @@ for a free Spamhaus DQS key and set `lfr config spam.dnsbl <key>.zen.dq.spamhaus
 ## Backups and upgrades
 
 `lfr backup /var/backups/lfr-$(date +%F)` writes a consistent copy (database, messages, site templates)
-into an empty directory while the server runs. Restore only a backup that holds BACKUP-COMPLETE (written last): stop the service and copy the
+into an empty directory while the server runs. The server streams it and the CLI writes and verifies
+it, so the directory can be any path the caller can write; with `--remote user@host` it lands on your
+machine. Restore only a backup that holds BACKUP-COMPLETE (written last): stop the service and copy the
 directory back to `/var/lib/lfr` (owned by `lfr`).
 
 Upgrade: install the new binary (same command as installing), then `sudo systemctl restart lfr`.
@@ -123,3 +125,24 @@ link expires.
 
 `lfr reader forget` does not remove messages from that address in mailboxes, existing backups or
 journald logs.
+
+## Per-list reader texts
+
+English and informal German are built in; other languages fall back to English. Use
+`lfr list text <slug>` to see every effective text and its source. Overrides apply to confirmation
+mail, signup and unsubscribe pages, consent, footers, archive labels and dates.
+
+For formal German, for example:
+
+```sh
+lfr list text news confirm.subject 'Bitte bestätigen Sie Ihr Abonnement von %s'
+lfr list text news confirm.subject --reset
+lfr list text news --import nl.json
+```
+
+An import is a flat JSON object, such as
+`{"confirm.subject":"Bevestig uw abonnement op %s","form.submit":"Aanmelden"}`. lfr checks the whole
+file before it changes anything; an empty value resets its key and keys the file leaves out stay as
+they are. Keep the English `%s` placeholders in order and write a literal percent sign as `%%`. `date`
+is a Go layout such as `2-1-2006`; month names in a layout always print in English, so use digits for
+other languages.

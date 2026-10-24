@@ -112,6 +112,7 @@ SMTP2GO: 2525 or 8465). off delivers directly to recipients' servers (needs outb
 https://<hostname>/lists/<slug>/. Tracking (opens and clicks) is off by default: in Germany
 it needs consent (TDDDG §25).`},
 		{path: "list ls", summary: "List lists with reader counts", run: runListList},
+		{path: "list text", args: "<slug> [<key> <value>]", summary: "Show or override reader texts for a list", run: runListText, flags: []flag{{name: "reset", usage: "reset the named key to its built-in text"}, {name: "import", value: true, usage: "flat JSON object of texts, - for stdin; empty values reset keys"}}},
 		{path: "list show", args: "<slug>", summary: "Show a list", run: runListShow},
 		{path: "list set", args: "<slug>", summary: "Change a list, or pause and resume sending", run: runListSet,
 			flags: append(listFlags(), flag{name: "pause", value: true, usage: "stop sending, with the reason"}, flag{name: "resume", usage: "send again after a pause"})},

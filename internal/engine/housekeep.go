@@ -46,6 +46,10 @@ func (e *Engine) housekeep(ctx context.Context) {
 // sweepBlobs removes stored messages nothing refers to anymore. Fresh files
 // are spared: a delivery may be between writing the file and its row.
 func (e *Engine) sweepBlobs(ctx context.Context, now time.Time) {
+	if !e.backupMu.TryLock() {
+		return
+	}
+	defer e.backupMu.Unlock()
 	removed := 0
 	e.Blobs.Walk(func(hash string) error {
 		p := filepath.Join(e.Opts.Data, BlobDir, hash[:2], hash+".eml")

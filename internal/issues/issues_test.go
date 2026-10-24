@@ -390,10 +390,13 @@ func TestFooterFollowsListChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	e.s.Lists.Update(ctx, "bakers", lists.Input{Address: ptr("Bakers, Ofenweg 3, 10115 Berlin")})
+	if _, err := e.s.Lists.SetTexts(ctx, "bakers", map[string]string{"footer.unsub": "Afmelden"}); err != nil {
+		t.Fatal(err)
+	}
 	e.s.Schedule(ctx, w.ID, time.Time{})
 	e.s.Tick(ctx)
 	runOnce(t, e)
-	if p := msg.Parse(e.sink.msgs[m.Email]); !strings.Contains(p.Text, "Ofenweg 3") {
+	if p := msg.Parse(e.sink.msgs[m.Email]); !strings.Contains(p.Text, "Ofenweg 3") || !strings.Contains(p.Text, "Afmelden") {
 		t.Fatalf("stale footer:\n%s", p.Text)
 	}
 }

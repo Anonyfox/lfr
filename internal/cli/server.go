@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Anonyfox/lfr/internal/api"
+	"github.com/Anonyfox/lfr/internal/backup"
 	"github.com/Anonyfox/lfr/internal/config"
 	"github.com/Anonyfox/lfr/internal/engine"
 	"github.com/Anonyfox/lfr/internal/events"
@@ -255,11 +256,10 @@ func runBackup(c *call) error {
 	if err != nil {
 		return err
 	}
-	var res api.BackupResult
 	ctx, cancel := context.WithTimeout(c.ctx, time.Hour)
 	defer cancel()
-	c.ctx = ctx
-	if err := c.do(api.OpBackup, api.Backup{Dir: dir}, &res); err != nil {
+	res, err := backup.Receive(ctx, c.client(), dir)
+	if err != nil {
 		return err
 	}
 	return c.result(res, func() {

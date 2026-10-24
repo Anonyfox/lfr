@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -251,6 +248,20 @@ func (e *Engine) register() {
 		return l, nil
 	}))
 	h(api.OpListList, op(func(ctx context.Context, _ struct{}) (any, error) { return nonNil(e.Lists.All(ctx)) }))
+	h(api.OpListText, op(func(ctx context.Context, a api.Name) (any, error) {
+		l, err := e.Lists.Get(ctx, a.Name)
+		if err != nil {
+			return nil, err
+		}
+		return l.TextValues(), nil
+	}))
+	h(api.OpListTextSet, op(func(ctx context.Context, a api.ListTexts) (any, error) {
+		l, err := e.Lists.SetTexts(ctx, a.Slug, a.Values)
+		if err != nil {
+			return nil, invalid("%s", err)
+		}
+		return l.TextValues(), nil
+	}))
 	h(api.OpListShow, op(func(ctx context.Context, a api.Name) (any, error) { return e.Lists.Get(ctx, a.Name) }))
 	h(api.OpListSet, op(func(ctx context.Context, a api.ListSet) (any, error) {
 		in, err := listInput(a.ListFields)
@@ -529,7 +540,7 @@ func (e *Engine) register() {
 	}))
 	h(api.OpSpamReset, op(func(ctx context.Context, _ struct{}) (any, error) { return nil, e.Spam.Reset(ctx) }))
 	h(api.OpReports, op(func(ctx context.Context, a api.Reports) (any, error) { return e.reports(ctx, a) }))
-	h(api.OpBackup, op(func(ctx context.Context, a api.Backup) (any, error) { return e.Backup(ctx, a.Dir) }))
+	e.Ctl.Stream(api.OpBackup, func(ctx context.Context, _ json.RawMessage, send func(any) error) error { return e.Backup(ctx, send) })
 }
 
 func nonNil[T any](v []T, err error) (any, error) {
@@ -854,83 +865,5 @@ func (e *Engine) reports(ctx context.Context, a api.Reports) (any, error) {
 	return out, rows.Err()
 }
 
-// Backup copies the database and every message into dir.
-func (e *Engine) Backup(ctx context.Context, dir string) (api.BackupResult, error) {
-	if dir == "" {
-		return api.BackupResult{}, invalid("name a backup directory")
-	}
-	if !filepath.IsAbs(dir) {
-		return api.BackupResult{}, invalid("backup directory must be an absolute path (the server resolves it, not your shell)")
-	}
-	if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
-		return api.BackupResult{}, invalid("%s is not empty", dir)
-	}
-	if err := os.MkdirAll(filepath.Join(dir, BlobDir), 0o750); err != nil {
-		return api.BackupResult{}, err
-	}
-	res := api.BackupResult{Dir: dir}
-	if err := e.DB.Backup(ctx, filepath.Join(dir, DBFile)); err != nil {
-		return res, err
-	}
-	err := e.Blobs.Walk(func(hash string) error {
-		r, err := e.Blobs.Open(hash)
-		if err != nil {
-			return err
-		}
-		defer r.Close()
-		n, err := writeSynced(filepath.Join(dir, BlobDir, hash[:2], hash+".eml"), r, 0o640)
-		if err != nil {
-			return err
-		}
-		res.Blobs++
-		res.Bytes += n
-		return nil
-	})
-	if err != nil {
-		return res, err
-	}
-	if _, serr := os.Stat(filepath.Join(e.Opts.Data, SiteDir)); serr == nil {
-		err = filepath.WalkDir(filepath.Join(e.Opts.Data, SiteDir), func(p string, d os.DirEntry, err error) error {
-			if err != nil || d.IsDir() {
-				return err
-			}
-			rel, _ := filepath.Rel(e.Opts.Data, p)
-			f, err := os.Open(p)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			_, err = writeSynced(filepath.Join(dir, rel), f, 0o644)
-			return err
-		})
-		if err != nil {
-			return res, err
-		}
-	}
-	// Written last: a backup without it was cut off and must not be restored.
-	done := fmt.Sprintf("lfr backup complete\nat: %s\nmessages: %d\nbytes: %d\n", e.Opts.Now().UTC().Format(time.RFC3339), res.Blobs, res.Bytes)
-	_, err = writeSynced(filepath.Join(dir, BackupDone), strings.NewReader(done), 0o640)
-	return res, err
-}
-
 // BackupDone marks a complete backup.
 const BackupDone = "BACKUP-COMPLETE"
-
-// writeSynced writes r to path and syncs it to disk.
-func writeSynced(path string, r io.Reader, mode os.FileMode) (int64, error) {
-	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
-		return 0, err
-	}
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, mode)
-	if err != nil {
-		return 0, err
-	}
-	n, err := io.Copy(f, r)
-	if err == nil {
-		err = f.Sync()
-	}
-	if cerr := f.Close(); err == nil {
-		err = cerr
-	}
-	return n, err
-}

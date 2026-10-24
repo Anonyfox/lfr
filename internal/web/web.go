@@ -25,7 +25,6 @@ import (
 	"github.com/Anonyfox/lfr/internal/config"
 	"github.com/Anonyfox/lfr/internal/events"
 	"github.com/Anonyfox/lfr/internal/feedback"
-	"github.com/Anonyfox/lfr/internal/i18n"
 	"github.com/Anonyfox/lfr/internal/issues"
 	"github.com/Anonyfox/lfr/internal/lists"
 	"github.com/Anonyfox/lfr/internal/store"
@@ -215,6 +214,12 @@ func (s *Server) render(w http.ResponseWriter, l *lists.List, name string, statu
 		http.Error(w, "template missing", 500)
 		return
 	}
+	t, err = t.Clone()
+	if err != nil {
+		http.Error(w, "template error", 500)
+		return
+	}
+	t = t.Funcs(template.FuncMap{"t": func(_ string, key string) string { return l.Text(key) }})
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "layout", p); err != nil {
 		s.Log.Error("render", "list", l.Slug, "page", name, "err", err)
@@ -229,8 +234,8 @@ func (s *Server) render(w http.ResponseWriter, l *lists.List, name string, statu
 func (s *Server) message(w http.ResponseWriter, l *lists.List, status int, key string, arg string, action, button string) {
 	p := s.base(l)
 	p.Robots = "noindex"
-	p.Heading = i18n.T(l.Language, "page."+key+".title")
-	body := i18n.T(l.Language, "page."+key+".body")
+	p.Heading = l.Text("page." + key + ".title")
+	body := l.Text("page." + key + ".body")
 	if strings.Contains(body, "%s") {
 		body = fmt.Sprintf(body, arg)
 	}
@@ -241,20 +246,17 @@ func (s *Server) message(w http.ResponseWriter, l *lists.List, status int, key s
 func (s *Server) items(l *lists.List, ws []*issues.Issue) []issueItem {
 	out := make([]issueItem, 0, len(ws))
 	for _, wv := range ws {
-		out = append(out, issueItem{URL: s.Renderer.IssueURL(l, wv), Subject: wv.Subject, Summary: wv.Summary, Date: dateOf(wv, l.Language)})
+		out = append(out, issueItem{URL: s.Renderer.IssueURL(l, wv), Subject: wv.Subject, Summary: wv.Summary, Date: dateOf(wv, l.Text("date"))})
 	}
 	return out
 }
 
-func dateOf(w *issues.Issue, lang string) string {
+func dateOf(w *issues.Issue, layout string) string {
 	t := w.Started
 	if t.IsZero() {
 		t = w.Created
 	}
-	if strings.HasPrefix(lang, "de") {
-		return t.Format("2.1.2006")
-	}
-	return t.Format("January 2, 2006")
+	return t.Format(layout)
 }
 
 func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, prefix, path string) {
@@ -272,7 +274,7 @@ func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, pre
 	case path == "/archive":
 		ws, _ := s.Issues.List(ctx, l.ID, true, 1000)
 		p := s.base(l)
-		p.Title = i18n.T(l.Language, "home.archive") + " · " + l.Name
+		p.Title = l.Text("home.archive") + " · " + l.Name
 		p.Issues = s.items(l, ws)
 		s.render(w, l, "archive", 200, p)
 	case strings.HasPrefix(path, "/media/"):
@@ -413,7 +415,7 @@ func (s *Server) reply(w http.ResponseWriter, r *http.Request, l *lists.List, st
 	if wantsJSON(r) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(map[string]any{"ok": status < 300, "status": key, "message": i18n.T(l.Language, "page."+key+".body")})
+		json.NewEncoder(w).Encode(map[string]any{"ok": status < 300, "status": key, "message": l.Text("page." + key + ".body")})
 		return
 	}
 	s.message(w, l, status, key, l.Name, "", "")
@@ -455,7 +457,7 @@ func (s *Server) confirm(w http.ResponseWriter, r *http.Request, tok string) {
 			s.message(w, l, 200, "confirmed", l.Name, "", "")
 			return
 		}
-		s.message(w, l, 200, "confirm", l.Name, r.URL.Path, i18n.T(l.Language, "confirm.action"))
+		s.message(w, l, 200, "confirm", l.Name, r.URL.Path, l.Text("confirm.action"))
 		return
 	}
 	was := m.Status
@@ -497,7 +499,7 @@ func (s *Server) unsubscribe(w http.ResponseWriter, r *http.Request, tok string)
 			s.message(w, l, 200, "unsubbed", l.Name, "", "")
 			return
 		}
-		s.message(w, l, 200, "unsub", l.Name, r.URL.Path, i18n.T(l.Language, "page.unsub.action"))
+		s.message(w, l, 200, "unsub", l.Name, r.URL.Path, l.Text("page.unsub.action"))
 		return
 	}
 	how := "link"

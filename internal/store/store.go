@@ -133,6 +133,9 @@ func (db *DB) migrate(ctx context.Context) error {
 		steps = append(steps, step{n, e.Name()})
 	}
 	sort.Slice(steps, func(i, j int) bool { return steps[i].n < steps[j].n })
+	if len(steps) > 0 && version > steps[len(steps)-1].n {
+		return fmt.Errorf("data was written by a newer lfr (schema %d); install that version", version)
+	}
 	for _, s := range steps {
 		if s.n <= version {
 			continue

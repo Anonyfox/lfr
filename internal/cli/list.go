@@ -1,11 +1,16 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/Anonyfox/lfr/internal/api"
+	"github.com/Anonyfox/lfr/internal/i18n"
 	"github.com/Anonyfox/lfr/internal/lists"
 )
 
@@ -13,7 +18,7 @@ func listFlags() []flag {
 	return []flag{
 		{name: "name", value: true, usage: "display name"}, {name: "from", value: true, usage: "sender address on a served domain"},
 		{name: "from-name", value: true, usage: "sender name (default: the list name)"}, {name: "description", value: true, usage: "one sentence shown on the website"},
-		{name: "host", value: true, usage: "website host, e.g. news.example.com"}, {name: "language", value: true, usage: "en or de (texts of pages and mails)"},
+		{name: "host", value: true, usage: "website host, e.g. news.example.com"}, {name: "language", value: true, usage: "language of pages and mails (en/de built in; English fallback, list text overrides)"},
 		{name: "tracking", usage: "count opens and clicks (--tracking=false turns it off)"}, {name: "reply-to", value: true, usage: "where replies go"},
 		{name: "imprint-url", value: true, usage: "imprint (Impressum) page"}, {name: "privacy-url", value: true, usage: "privacy policy page"},
 		{name: "address", value: true, usage: "sender identity line in every footer (name and postal address)"},
@@ -59,8 +64,12 @@ func runListAdd(c *call) error {
 	if err := c.do(api.OpListAdd, api.ListSet{Slug: c.args[0], ListFields: listFields(c)}, &l); err != nil {
 		return err
 	}
+	warned := warnListLanguage(c, l)
 	return c.result(l, func() {
 		printList(c, l)
+		if warned {
+			return
+		}
 		if l.Host != "" {
 			c.next("point %s at this server (lfr domain dns %s lists the record), then lfr init <dir> --list %s starts the newsletter project", l.Host, l.Domain, l.Slug)
 		} else {
@@ -112,6 +121,9 @@ func runListSet(c *call) error {
 	if err := c.do(api.OpListSet, api.ListSet{Slug: c.args[0], ListFields: listFields(c)}, &l); err != nil {
 		return err
 	}
+	if c.has("language") {
+		warnListLanguage(c, l)
+	}
 	return c.result(l, func() { printList(c, l) })
 }
 
@@ -152,4 +164,89 @@ func runListRemove(c *call) error {
 		return err
 	}
 	return c.result(map[string]string{"removed": c.args[0]}, func() { c.printf("Removed %s\n", c.args[0]) })
+}
+
+func warnListLanguage(c *call, l lists.List) bool {
+	if i18n.Supported(l.Language) || len(l.Texts) > 0 {
+		return false
+	}
+	fmt.Fprintf(c.env.Stderr, "Warning: %s has no built-in texts; readers see English until overrides are imported.\n", l.Language)
+	fmt.Fprintf(c.env.Stderr, "Next: lfr list text %s --import nl.json\n", l.Slug)
+	return true
+}
+
+func runListText(c *call) error {
+	if len(c.args) < 1 {
+		return usage("name a list; use lfr list text <slug>")
+	}
+	values := map[string]string{}
+	op := api.OpListText
+	var args any = api.Name{Name: c.args[0]}
+	if c.has("import") {
+		if len(c.args) != 1 || c.has("reset") {
+			return usage("use lfr list text <slug> --import <file|->")
+		}
+		var r io.Reader = c.env.Stdin
+		if c.str("import") != "-" {
+			f, err := os.Open(c.str("import"))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			r = f
+		}
+		b, err := io.ReadAll(io.LimitReader(r, (1<<20)+1))
+		if err != nil {
+			return err
+		}
+		if len(b) > 1<<20 {
+			return usage("text import is too large; keep it below 1 MiB")
+		}
+		// Raw values reject null as well as non-string JSON values.
+		var raw map[string]json.RawMessage
+		if err := json.Unmarshal(b, &raw); err != nil || raw == nil {
+			return usage("invalid text import; provide a flat JSON object of strings")
+		}
+		for k, v := range raw {
+			var str string
+			if string(v) == "null" || json.Unmarshal(v, &str) != nil {
+				return usage("invalid text %s; provide a string value", k)
+			}
+			values[k] = str
+		}
+		op = api.OpListTextSet
+	} else if c.has("reset") {
+		if len(c.args) != 2 {
+			return usage("use lfr list text <slug> <key> --reset")
+		}
+		values[c.args[1]] = ""
+		op = api.OpListTextSet
+	} else if len(c.args) == 3 {
+		values[c.args[1]] = c.args[2]
+		op = api.OpListTextSet
+	} else if len(c.args) != 1 {
+		return usage("use lfr list text <slug> [<key> <value>]")
+	}
+	if op == api.OpListTextSet {
+		args = api.ListTexts{Slug: c.args[0], Values: values}
+	}
+	var out map[string]lists.TextValue
+	if err := c.do(op, args, &out); err != nil {
+		return err
+	}
+	return c.result(out, func() {
+		keys := make([]string, 0, len(out))
+		for k := range out {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			source := "built-in"
+			if out[k].Overridden {
+				source = "overridden"
+			}
+			c.printf("%s (%s): %s\n", k, source, out[k].Value)
+		}
+		c.next("lfr list text %s", c.args[0])
+	})
 }

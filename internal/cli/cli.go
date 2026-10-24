@@ -222,6 +222,10 @@ func (c *call) exit(err error) int {
 		return ExitOK
 	}
 	if c.ctx.Err() != nil {
+		fmt.Fprintf(c.env.Stderr, "lfr %s: %v\n", c.cmd.path, err)
+		if c.json {
+			json.NewEncoder(c.env.Stdout).Encode(map[string]any{"error": err.Error(), "code": "interrupted", "exit": ExitInterrupt})
+		}
 		return ExitInterrupt
 	}
 	var ue usageError

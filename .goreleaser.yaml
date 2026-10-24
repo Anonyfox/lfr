@@ -52,5 +52,13 @@ changelog:
     exclude: ["^docs:", "^test:", "^chore:"]
 
 release:
+  header: |
+    Install or upgrade on the server:
+
+    ```sh
+    curl -fsSL https://lfr.email/install.sh | sudo sh
+    ```
+
+    Without sudo the script installs to `~/.local/bin`, which is enough on a machine that only drives a server over ssh. With Homebrew: `brew install anonyfox/tap/lfr`.
   draft: false
   prerelease: auto

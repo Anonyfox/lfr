@@ -286,6 +286,8 @@ func (c Client) Call(ctx context.Context, op string, args, out any) error {
 
 // Stream runs a streaming op, calling fn for each value until ctx ends.
 func (c Client) Stream(ctx context.Context, op string, args any, fn func(json.RawMessage) error) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	conn, err := c.dial(ctx)
 	if err != nil {
 		return err
@@ -295,13 +297,21 @@ func (c Client) Stream(ctx context.Context, op string, args any, fn func(json.Ra
 	if err := send(conn, op, args); err != nil {
 		return err
 	}
-	dec := json.NewDecoder(conn)
+	scanner := bufio.NewScanner(conn)
+	scanner.Buffer(make([]byte, 4096), 1<<20)
 	for {
 		var resp Response
-		if err := dec.Decode(&resp); err != nil {
+		if !scanner.Scan() {
+			err := scanner.Err()
+			if err == nil {
+				err = io.ErrUnexpectedEOF
+			}
 			if ctx.Err() != nil {
 				return nil
 			}
+			return err
+		}
+		if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
 			return err
 		}
 		if !resp.OK {
