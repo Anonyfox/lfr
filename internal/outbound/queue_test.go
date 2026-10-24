@@ -176,25 +176,32 @@ func TestQueueSkipAndRetryDrop(t *testing.T) {
 	}
 }
 
+// A running queue goes idle once nothing is due, and an enqueue wakes it.
+// The second mail is enqueued only after the first was sent, so it always
+// arrives through the idle wait.
 func TestQueueRunWakes(t *testing.T) {
 	ft := &fakeTransport{}
 	q, d, _ := newQueue(t, ft)
 	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan struct{})
-	go func() { q.Run(ctx); close(done) }()
-	q.Enqueue(context.Background(), Item{Kind: KindMail, DomainID: d.ID, Rcpt: "w@example.org"})
-	deadline := time.Now().Add(5 * time.Second)
-	for {
-		if s, _ := status(t, q, "w@example.org"); s == "sent" {
-			break
+	done := make(chan error, 1)
+	go func() { done <- q.Run(ctx) }()
+	for _, rcpt := range []string{"w@example.org", "x@example.org"} {
+		q.Enqueue(context.Background(), Item{Kind: KindMail, DomainID: d.ID, Rcpt: rcpt})
+		deadline := time.Now().Add(5 * time.Second)
+		for {
+			if s, _ := status(t, q, rcpt); s == "sent" {
+				break
+			}
+			if time.Now().After(deadline) {
+				t.Fatalf("%s not delivered after wake", rcpt)
+			}
+			time.Sleep(10 * time.Millisecond)
 		}
-		if time.Now().After(deadline) {
-			t.Fatal("not delivered after wake")
-		}
-		time.Sleep(10 * time.Millisecond)
 	}
 	cancel()
-	<-done
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestQueueRelayOutageKeepsAttempts(t *testing.T) {
