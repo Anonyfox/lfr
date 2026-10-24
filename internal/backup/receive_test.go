@@ -27,7 +27,7 @@ func TestRejectEscapingFrames(t *testing.T) {
 			dir := t.TempDir()
 			target := filepath.Join(dir, "backup")
 
-			listener, err := net.Listen("unix", filepath.Join(t.TempDir(), "s"))
+			listener, err := net.Listen("unix", socketPath(t))
 			if err != nil {
 				t.Fatal(err)
 			}

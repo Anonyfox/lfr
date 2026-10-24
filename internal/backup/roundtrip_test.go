@@ -25,13 +25,25 @@ func serve(t *testing.T, frames func(send func(any) error) error) ctl.Client {
 	t.Cleanup(cancel)
 	s := &ctl.Server{Log: slog.New(slog.NewTextHandler(io.Discard, nil))}
 	s.Stream(api.OpBackup, func(_ context.Context, _ json.RawMessage, send func(any) error) error { return frames(send) })
-	l, err := net.Listen("unix", filepath.Join(t.TempDir(), "s"))
+	l, err := net.Listen("unix", socketPath(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { l.Close() })
 	go s.Serve(ctx, l)
 	return ctl.Client{Path: l.Addr().String()}
+}
+
+// socketPath is short: macOS caps unix socket paths at 104 bytes, and
+// t.TempDir under its long TMPDIR exceeds that.
+func socketPath(t *testing.T) string {
+	t.Helper()
+	dir, err := os.MkdirTemp("/tmp", "lfrb")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(dir) })
+	return filepath.Join(dir, "s")
 }
 
 func sum(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
