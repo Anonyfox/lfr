@@ -1,7 +1,7 @@
 #!/bin/sh
 # Installs the lfr binary for Linux or macOS (amd64, arm64).
 #
-#   curl -fsSL https://lfr.email/install.sh | sh
+#   curl -fsSL https://lfr.email/install.sh | sudo sh
 #
 # As root it installs to /usr/local/bin (a server); otherwise to ~/.local/bin.
 # Settings, all optional:

@@ -10,8 +10,11 @@
 the terminal.** No admin UI, no per-subscriber bill.
 
 ```sh
-curl -fsSL https://lfr.email/install.sh | sh
+curl -fsSL https://lfr.email/install.sh | sudo sh
 ```
+
+On the server it goes to `/usr/local/bin`. Without sudo it installs to `~/.local/bin`, which is enough
+on a machine that only drives a server over ssh.
 
 `lfr` runs mail for your domains from one binary on one small server: mailboxes, and newsletters with
 their websites. An agent operates it through a CLI, on the server or over ssh; there is no admin UI, no

@@ -304,3 +304,41 @@ func TestClientIP(t *testing.T) {
 	}
 	_ = http.StatusOK
 }
+
+func TestHookReceiptThrottle(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	receipt := func() string {
+		t.Helper()
+		v, err := e.srv.DB.Setting(ctx, "relay.last_hook", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		return v
+	}
+	post := func(provider string) {
+		t.Helper()
+		r := e.do("POST", "https://mail.example.com"+e.srv.HookPath(provider),
+			`{"type":"complaint","email":"reader@x.org"}`, "Content-Type", "application/json")
+		if r.Code != 204 {
+			t.Fatalf("hook: %d", r.Code)
+		}
+	}
+	post("generic")
+	first := receipt()
+	if first != e.now.UTC().Format(time.RFC3339)+" generic" {
+		t.Fatalf("receipt: %q", first)
+	}
+	e.now = e.now.Add(59 * time.Second)
+	// Forget the in-memory timestamp to exercise the restart path.
+	e.srv.hookRecorded = time.Time{}
+	post("smtp2go")
+	if receipt() != first {
+		t.Fatal("receipt written within a minute")
+	}
+	e.now = e.now.Add(time.Second)
+	post("smtp2go")
+	if got := receipt(); got != e.now.UTC().Format(time.RFC3339)+" smtp2go" {
+		t.Fatalf("later receipt: %q", got)
+	}
+}

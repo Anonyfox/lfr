@@ -113,6 +113,7 @@ var Keys = []Key{
 	{Name: "web.confirm_per_list", Default: "200", Check: isInt(1, 1000000), Help: "Confirmation mails per list per hour; protects against list bombing."},
 	{Name: "retention.trash_days", Default: "30", Check: isInt(1, 3650), Help: "Days before trash is purged."},
 	{Name: "retention.junk_days", Default: "30", Check: isInt(1, 3650), Help: "Days before junk is purged."},
+	{Name: "retention.unsubscribed_days", Default: "1095", Check: isInt(30, 36500), Help: "Days after unsubscribe before member IP addresses and browser details are cleared; suppression and consent records stay."},
 	{Name: "retention.events_days", Default: "400", Check: isInt(30, 36500), Help: "Days opens, clicks and delivery events are kept."},
 }
 

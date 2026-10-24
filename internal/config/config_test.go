@@ -13,6 +13,8 @@ func TestChecks(t *testing.T) {
 		{"mta_sts.mode", "enforce", true}, {"mta_sts.mode", "strict", false},
 		{"relay.rate", "14", true}, {"relay.rate", "0", false},
 		{"smtp.early_talker", "maybe", false},
+		{"retention.unsubscribed_days", "30", true}, {"retention.unsubscribed_days", "36500", true},
+		{"retention.unsubscribed_days", "29", false}, {"retention.unsubscribed_days", "36501", false},
 	} {
 		k, found := Lookup(c.key)
 		if !found {

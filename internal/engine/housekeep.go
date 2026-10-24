@@ -28,6 +28,12 @@ func (e *Engine) housekeep(ctx context.Context) {
 	// Signups never confirmed are no consent; their IP and browser go once
 	// the link expired (GDPR Art. 5(1)(e)).
 	e.DB.W.ExecContext(ctx, `DELETE FROM members WHERE status = 'pending' AND max(confirm_sent, signup_at) < ?`, now.Add(-lists.ConfirmValidity).Unix())
+	if _, err := e.DB.W.ExecContext(ctx, `UPDATE members SET signup_ip = '', signup_ua = '', confirm_ip = ''
+		WHERE status = 'unsubscribed' AND unsub_at < ?
+		AND (signup_ip != '' OR signup_ua != '' OR confirm_ip != '')`,
+		now.AddDate(0, 0, -e.Config.Int(ctx, "retention.unsubscribed_days")).Unix()); err != nil {
+		e.Log.Warn("clear unsubscribed member metadata", "err", err)
+	}
 	if n, err := e.Issues.Archive(ctx, time.Unix(cutoff, 0)); err != nil {
 		e.Log.Warn("archive issues", "err", err)
 	} else if n > 0 {

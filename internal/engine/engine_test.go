@@ -662,3 +662,87 @@ func TestSendToEmptyListRefused(t *testing.T) {
 		t.Fatalf("status %s", w.Status)
 	}
 }
+
+func TestRelayWebhookReceipt(t *testing.T) {
+	h := start(t)
+	ctx := context.Background()
+	check := h.e.relayWebhookCheck(ctx, "https://mail.example.com/hooks/configure")
+	if check.Status != "skip" || !strings.Contains(check.Detail, "/hooks/configure") {
+		t.Fatalf("fresh webhook: %+v", check)
+	}
+	post := func(path, body string, want int) {
+		t.Helper()
+		req := httptest.NewRequest("POST", "https://mail.example.com"+path, strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		h.e.Web.ServeHTTP(rec, req)
+		if rec.Code != want {
+			t.Fatalf("webhook: %d: %s", rec.Code, rec.Body.String())
+		}
+	}
+	post("/hooks/wrong/smtp2go", "{}", 404)
+	post(h.e.Web.HookPath("smtp2go"), "{", 400)
+	if c := h.e.relayWebhookCheck(ctx, "url"); c.Status != "skip" {
+		t.Fatalf("invalid receipt: %+v", c)
+	}
+	post(h.e.Web.HookPath("smtp2go"), `{"event":"bounce","rcpt":"unknown@example.org","bounce":"hard"}`, 204)
+	check = h.e.relayWebhookCheck(ctx, "url")
+	if check.Status != "ok" || !strings.Contains(check.Detail, "smtp2go: last notification ") {
+		t.Fatalf("accepted receipt: %+v", check)
+	}
+	post(h.e.Web.HookPath("generic"), `{"type":"complaint","email":"unknown@example.org"}`, 204)
+	if c := h.e.relayWebhookCheck(ctx, "url"); c.Detail != check.Detail {
+		t.Fatalf("burst wrote again: %+v", c)
+	}
+}
+
+func TestUnsubscribedRetention(t *testing.T) {
+	h := start(t)
+	ctx := context.Background()
+	h.call(t, api.OpDomainAdd, api.Name{Name: "example.com"}, nil)
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "bakers", ListFields: api.ListFields{Name: strPtr("Bakers"), From: strPtr("news@example.com")}}, nil)
+	h.call(t, api.OpSubAdd, api.SubAdd{List: "bakers", Emails: []string{"old@example.org", "recent@example.org", "active@example.org"}, Confirmed: true, Consent: "Original consent"}, nil)
+	if err := h.e.Config.Set(ctx, "retention.unsubscribed_days", "30"); err != nil {
+		t.Fatal(err)
+	}
+	cutoff := h.e.Opts.Now().AddDate(0, 0, -30).Unix()
+	_, err := h.e.DB.W.ExecContext(ctx, `UPDATE members SET signup_ip = '192.0.2.1', signup_ua = 'browser', confirm_ip = '192.0.2.2',
+ status = CASE WHEN contact_id = (SELECT id FROM contacts WHERE email = 'active@example.org') THEN 'confirmed' ELSE 'unsubscribed' END,
+ unsub_at = CASE WHEN contact_id = (SELECT id FROM contacts WHERE email = 'old@example.org') THEN ? ELSE ? END,
+ unsub_how = 'link'`, cutoff-1, cutoff)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.e.housekeep(ctx)
+	rows, err := h.e.DB.R.QueryContext(ctx, `SELECT c.email, m.status, m.signup_ip, m.signup_ua, m.confirm_ip, m.consent, m.unsub_how, m.unsub_at
+ FROM members m JOIN contacts c ON c.id = m.contact_id`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	count := 0
+	for rows.Next() {
+		var email, status, ip, ua, confirm, consent, how string
+		var at int64
+		if err := rows.Scan(&email, &status, &ip, &ua, &confirm, &consent, &how, &at); err != nil {
+			t.Fatal(err)
+		}
+		count++
+		if consent != "Original consent" || how != "link" {
+			t.Fatalf("consent lost: %s", email)
+		}
+		if email == "old@example.org" {
+			if status != "unsubscribed" || at != cutoff-1 || ip != "" || ua != "" || confirm != "" {
+				t.Fatalf("old member: %s %d %q %q %q", status, at, ip, ua, confirm)
+			}
+		} else if ip == "" || ua == "" || confirm == "" {
+			t.Fatalf("cleared current member: %s", email)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if count != 3 {
+		t.Fatalf("members: %d", count)
+	}
+}

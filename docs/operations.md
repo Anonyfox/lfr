@@ -11,6 +11,10 @@ curl -fsSL https://lfr.email/install.sh | sudo sh
 sudo lfr setup --hostname mail.example.com --acme-email you@example.com --systemd
 ```
 
+Without sudo the script installs to `~/.local/bin`, which is enough on a machine that only drives a
+server over ssh. `lfr setup --systemd` needs it in `/usr/local/bin`, because the service cannot see
+home directories.
+
 The service runs as user `lfr`, may bind ports 25, 80 and 443, can write only `/var/lib/lfr`, and is
 capped at 400 MB. Add the user your agent runs as to the `lfr` group to use the CLI without sudo:
 `sudo usermod -aG lfr agent`. Logs: `journalctl -u lfr`.
@@ -108,3 +112,14 @@ Migrations run on start; there is no downgrade.
 | Mail lands in recipients' spam | `lfr doctor`, `lfr reports`, DMARC alignment, content (`lfr issue show`) |
 | HTTPS certificate missing | DNS of the host points here, port 80 open, `lfr doctor` (tls lines) |
 | A list stopped sending | `lfr list show <list>`: the pause reason |
+
+## Privacy and data retention
+
+Hourly housekeeping clears signup and confirmation IP addresses and the signup browser for
+unsubscribed members after `retention.unsubscribed_days` (default 1095 days; configurable from 30 to
+36500). The member row, status, dates, unsubscribe method and consent text stay, preserving
+suppression and a minimal consent record. Unconfirmed signups are deleted after their confirmation
+link expires.
+
+`lfr reader forget` does not remove messages from that address in mailboxes, existing backups or
+journald logs.

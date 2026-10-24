@@ -57,6 +57,9 @@ type Server struct {
 	snsOnce sync.Once
 	sns     *feedback.SNSVerifier
 
+	hookMu       sync.Mutex
+	hookRecorded time.Time
+
 	limits limiter
 }
 
@@ -674,7 +677,27 @@ func (s *Server) hook(w http.ResponseWriter, r *http.Request, rest string) {
 	if len(evs) > 0 {
 		s.Feedback(r.Context(), evs)
 	}
+	s.recordHook(r.Context(), provider)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// recordHook persists receipt at most once a minute, including across restarts.
+func (s *Server) recordHook(ctx context.Context, provider string) {
+	s.hookMu.Lock()
+	defer s.hookMu.Unlock()
+	now := s.Now()
+	if s.hookRecorded.IsZero() {
+		v, _ := s.DB.Setting(ctx, "relay.last_hook", "")
+		at, _, _ := strings.Cut(v, " ")
+		s.hookRecorded, _ = time.Parse(time.RFC3339, at)
+	}
+	if !s.hookRecorded.IsZero() && now.Sub(s.hookRecorded) < time.Minute {
+		return
+	}
+	if err := s.DB.SetSetting(ctx, "relay.last_hook", now.UTC().Format(time.RFC3339)+" "+provider); err != nil {
+		s.Log.Warn("record webhook receipt", "err", err)
+	}
+	s.hookRecorded = now
 }
 
 type atomFeed struct {

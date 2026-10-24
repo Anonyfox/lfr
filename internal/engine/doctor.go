@@ -128,7 +128,7 @@ func (e *Engine) Doctor(ctx context.Context) []api.Check {
 		if info.SPF == "" {
 			add(api.Check{Name: "relay spf", Status: "skip", Detail: "the relay's SPF mechanism is not set; DMARC passes through lfr's DKIM signature, and SPF only counts when the relay sends with your domain in the envelope", Fix: "lfr relay <url> --spf include:amazonses.com (or your relay's) when you set up a custom MAIL FROM domain"})
 		}
-		add(api.Check{Name: "relay webhooks", Status: "skip", Detail: "point bounce and complaint notifications at " + info.Webhooks["generic"] + " (see lfr relay)"})
+		add(e.relayWebhookCheck(ctx, info.Webhooks["generic"]))
 	}
 
 	ds, _ := e.Domains.List(ctx)
@@ -234,4 +234,16 @@ func ipList(addrs []net.IPAddr) string {
 		s = append(s, a.IP.String())
 	}
 	return strings.Join(s, ", ")
+}
+
+// relayWebhookCheck distinguishes an unused endpoint from one that received valid notifications.
+func (e *Engine) relayWebhookCheck(ctx context.Context, url string) api.Check {
+	c := api.Check{Name: "relay webhooks", Status: "skip", Detail: "point bounce and complaint notifications at " + url + " (see lfr relay)"}
+	v, _ := e.DB.Setting(ctx, "relay.last_hook", "")
+	at, provider, _ := strings.Cut(v, " ")
+	if when, err := time.Parse(time.RFC3339, at); err == nil {
+		c.Status = "ok"
+		c.Detail = provider + ": last notification " + when.Format(time.RFC3339)
+	}
+	return c
 }
