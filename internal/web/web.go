@@ -348,12 +348,15 @@ func (s *Server) subscribe(w http.ResponseWriter, r *http.Request, l *lists.List
 	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
 	var email, honeypot, ts, source string
 	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		var in struct{ Email, Website, Ts, Source string }
+		var in struct {
+			Email, Website, Source string
+			TS                     string `json:"Ts"`
+		}
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 			s.reply(w, r, l, http.StatusBadRequest, "invalid")
 			return
 		}
-		email, honeypot, ts, source = in.Email, in.Website, in.Ts, in.Source
+		email, honeypot, ts, source = in.Email, in.Website, in.TS, in.Source
 	} else {
 		if err := r.ParseForm(); err != nil {
 			s.reply(w, r, l, http.StatusBadRequest, "invalid")

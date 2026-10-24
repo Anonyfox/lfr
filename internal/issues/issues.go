@@ -458,7 +458,6 @@ func (s *Service) start(ctx context.Context, w *Issue) (int, error) {
 	return int(n), nil
 }
 
-// Tick starts due issues and marks finished ones. The engine calls it every few seconds.
 // MaxLate is how far past its slot a scheduled issue still starts by
 // itself, after the server was down. Later, its text may no longer fit the
 // day ("this weekend"), so it waits for the owner (Missed).
@@ -481,6 +480,7 @@ func (s *Service) Missed(ctx context.Context) ([]*Issue, error) {
 	return out, rows.Err()
 }
 
+// Tick starts due issues and marks finished ones. The engine calls it every few seconds.
 func (s *Service) Tick(ctx context.Context) error {
 	now := s.Now()
 	rows, err := s.DB.R.QueryContext(ctx, selectIssue+" WHERE w.status = 'scheduled' AND w.scheduled <= ? AND w.scheduled > ?", now.Unix(), now.Add(-MaxLate).Unix())

@@ -186,7 +186,7 @@ func runListText(c *call) error {
 		if len(c.args) != 1 || c.has("reset") {
 			return usage("use lfr list text <slug> --import <file|->")
 		}
-		var r io.Reader = c.env.Stdin
+		r := c.env.Stdin
 		if c.str("import") != "-" {
 			f, err := os.Open(c.str("import"))
 			if err != nil {

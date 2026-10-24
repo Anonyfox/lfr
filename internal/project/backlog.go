@@ -9,7 +9,7 @@ import (
 	"github.com/Anonyfox/lfr/internal/finding"
 )
 
-// Idea statuses, in the order an idea moves through them.
+// Statuses lists idea statuses in the order an idea moves through them.
 var Statuses = []string{"focus", "idea", "planned", "drafted", "sent", "dropped"}
 
 // Idea is one backlog entry.

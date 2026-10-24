@@ -103,7 +103,7 @@ func (f *Fake) LookupCNAME(_ context.Context, host string) (string, error) {
 	return "", notFound(host)
 }
 
-// Set helpers for tests.
+// SetTXT sets the TXT records for name.
 func (f *Fake) SetTXT(name string, v ...string) { f.mu.Lock(); f.TXT[key(name)] = v; f.mu.Unlock() }
 func (f *Fake) SetIP(name string, ips ...string) {
 	f.mu.Lock()
