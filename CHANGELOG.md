@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 (unreleased)
+## 0.2.2 (2026-10-24)
 
 - `lfr doctor` reports the relay webhook as ok once a notification has arrived, with the provider and
   time. Before, it always said "skip", even when the webhook worked.
