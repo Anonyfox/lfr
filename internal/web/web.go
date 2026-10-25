@@ -119,6 +119,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case path == "/robots.txt":
 		h.Set("Content-Type", "text/plain; charset=utf-8")
 		io.WriteString(w, "User-agent: *\nDisallow: /u/\nDisallow: /confirm/\nDisallow: /c/\nDisallow: /o/\nDisallow: /hooks/\n")
+		if l, err := s.Lists.ByHost(ctx, hostname); err == nil {
+			io.WriteString(w, "\nSitemap: "+s.Renderer.ListURL(l)+"/sitemap.xml\n")
+		}
 		return
 	case strings.HasPrefix(path, "/confirm/"):
 		s.confirm(w, r, strings.TrimPrefix(path, "/confirm/"))
@@ -306,6 +309,8 @@ func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, pre
 		s.render(w, l, "issue", 200, p)
 	case path == "/feed.xml":
 		s.feed(w, r, l)
+	case path == "/sitemap.xml":
+		s.sitemap(w, r, l)
 	case path == "/subscribe":
 		if r.Method == http.MethodOptions {
 			cors(w)
@@ -762,6 +767,30 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request, l *lists.List) {
 	w.Header().Set("Cache-Control", "public, max-age=600")
 	io.WriteString(w, xml.Header)
 	xml.NewEncoder(w).Encode(f)
+}
+
+type sitemapURL struct {
+	Loc     string `xml:"loc"`
+	LastMod string `xml:"lastmod,omitempty"`
+}
+
+type urlSet struct {
+	XMLName xml.Name     `xml:"http://www.sitemaps.org/schemas/sitemap/0.9 urlset"`
+	URLs    []sitemapURL `xml:"url"`
+}
+
+// sitemap lists the front page, the archive and every published issue.
+func (s *Server) sitemap(w http.ResponseWriter, r *http.Request, l *lists.List) {
+	ws, _ := s.Issues.List(r.Context(), l.ID, true, 50000)
+	home := s.Renderer.ListURL(l)
+	set := urlSet{URLs: []sitemapURL{{Loc: home + "/"}, {Loc: home + "/archive"}}}
+	for _, wv := range ws {
+		set.URLs = append(set.URLs, sitemapURL{Loc: s.Renderer.IssueURL(l, wv), LastMod: dateOf(wv, "2006-01-02")})
+	}
+	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=600")
+	io.WriteString(w, xml.Header)
+	xml.NewEncoder(w).Encode(set)
 }
 
 func trimTo(s string, n int) string {

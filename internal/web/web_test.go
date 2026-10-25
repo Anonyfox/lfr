@@ -138,6 +138,43 @@ func TestSitePages(t *testing.T) {
 	}
 }
 
+func TestSitemapAndRobots(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	sent, _ := e.srv.Issues.Create(ctx, "bakers", issues.Draft{Markdown: "# First bake\n\nCrust matters."})
+	e.srv.Issues.Create(ctx, "bakers", issues.Draft{Markdown: "# Secret draft\n\nNot yet."})
+	e.srv.DB.W.Exec("UPDATE issues SET status = 'sent', started = ? WHERE id = ?", e.now.Unix(), sent.ID)
+	for _, c := range []struct {
+		url        string
+		want, gone []string
+	}{
+		{"https://news.example.com/sitemap.xml",
+			[]string{"<loc>https://news.example.com/</loc>", "<loc>https://news.example.com/archive</loc>", "<loc>https://news.example.com/issues/first-bake</loc>", "<lastmod>2026-10-19</lastmod>"},
+			[]string{"secret-draft"}},
+		{"https://mail.example.com/lists/plain/sitemap.xml",
+			[]string{"<loc>https://mail.example.com/lists/plain/</loc>", "<loc>https://mail.example.com/lists/plain/archive</loc>"},
+			[]string{"issues/"}},
+		{"https://news.example.com/robots.txt", []string{"Disallow: /u/", "Sitemap: https://news.example.com/sitemap.xml"}, nil},
+		{"https://mail.example.com/robots.txt", []string{"Disallow: /u/"}, []string{"Sitemap:"}},
+	} {
+		r := e.do("GET", c.url, "")
+		body := r.Body.String()
+		if r.Code != 200 {
+			t.Errorf("%s: %d", c.url, r.Code)
+		}
+		for _, w := range c.want {
+			if !strings.Contains(body, w) {
+				t.Errorf("%s lacks %q:\n%s", c.url, w, body)
+			}
+		}
+		for _, g := range c.gone {
+			if strings.Contains(body, g) {
+				t.Errorf("%s has %q:\n%s", c.url, g, body)
+			}
+		}
+	}
+}
+
 func TestSignupProtections(t *testing.T) {
 	e := setup(t)
 	form := func(v url.Values) string { return v.Encode() }
