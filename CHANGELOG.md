@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5 (2026-10-25)
+
+- List sites serve `/sitemap.xml` with the front page, the archive and every published issue (with
+  its date). On a list's own host, robots.txt names the sitemap.
+- The list site theme drops the dotted radial-gradient edge above the signup card and notices; they
+  get a 3 px ink top rule. Its custom properties are `--ground` and `--panel` (were `--paper` and
+  `--sheet`); the grey-blue and navy palette is unchanged. Sites with their own templates keep
+  working; templates that used the old names need the new ones.
+
 ## 0.2.4 (2026-10-24)
 
 - Security: the release archives stored their files as uid and gid 1001 (the build machine's user),
