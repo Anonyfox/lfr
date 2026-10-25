@@ -18,7 +18,7 @@ note records why they look the way they do. The inputs were lfr's own: the craft
 
 ## What the inputs say
 
-- lfr means "looking for readers"; lfr.email dresses it as a dispatch form: manila paper, typewriter
+- lfr means "looking for readers"; lfr.email dresses it as a dispatch form: grey-blue ground, typewriter
   ink, postmark red, airmail blue (site/concept.md).
 - Readers subscribe to hear from a person (V015) and want the substance in the mail, not a teaser
   (V017). A newsletter is a letter.
@@ -40,8 +40,8 @@ note records why they look the way they do. The inputs were lfr's own: the craft
 7. ~~The lfr.email dispatch form, typewritten, on every list site.~~ lfr's own voice would drown the
    writer's; the list sites belong to the newsletter, not to lfr.
 8. **Aerogramme.** Each issue is a letter on the pale blue, lightweight airmail sheet that folds into
-   its own envelope; the signup is a tear-off reply card; the pages a mail link opens are the receipt
-   slips of registered post, since double opt-in is exactly a signature for delivery. Postal like
+   its own envelope; the signup is a reply card; the pages a mail link opens are the notices of
+   registered post, since double opt-in is exactly a signature for delivery. Postal like
    lfr.email, but quiet enough to carry another writer's newsletter.
 9. A correspondence register: the archive as the ledger of letters sent, dated in a margin column.
    Kept as the archive's form inside direction 8.
@@ -64,26 +64,28 @@ the system serif. No web font: a list site costs no request beyond its own HTML.
 
 **Colour roles.** White with grey and an indigo or blue accent (35%), cream with terracotta (12%),
 stone neutrals with teal, the old default (10%), black and white with one neon (8%), navy with cyan
-in dark mode (6%), manila with postmark red, the lfr.email palette (2%), **aerogramme blue paper with
+in dark mode (6%), manila with postmark red, the old lfr.email palette (2%), **aerogramme blue with
 blue-black ink and postmark red (under 1%)**. Roles:
 
 | Role | Light | Dark | From |
 | --- | --- | --- | --- |
-| Paper, the page | `#e6edf4` | `#0f1620` | the aerogramme sheet |
-| Sheet, cards and fields | `#f6f9fb` | `#172231` | the inside of the fold |
+| Ground (`--ground`), the page | `#e6edf4` | `#0f1620` | aerogramme blue |
+| Panel (`--panel`), cards and fields | `#f6f9fb` | `#172231` | the inside of the fold |
 | Ink, text | `#142033` | `#e3eaf3` | blue-black fountain-pen ink |
-| Faded ink, dates and notes | `#46546a` | `#a6b3c4` | ink through thin paper |
+| Faded ink, dates and notes | `#46546a` | `#a6b3c4` | diluted ink |
 | Rule, lines and borders | `#9fb0c4` | `#3a4a5f` | printed form lines |
 | Postmark, the one action | `#a3271f` | `#f08a7d` | cancellation stamps, as on lfr.email |
 | Airmail, links | `#1d4a86` | `#9cc0f0` | airmail blue, as on lfr.email |
 
-Body text has at least 11:1 against its paper in both schemes, faded ink at least 6:1, the button
+Body text has at least 11:1 against its ground in both schemes, faded ink at least 6:1, the button
 label at least 6.9:1.
 
 **Radius and shape.** 8 to 12 px rounded cards (45%), 4 px corners (15%), pills (15%), sharp
-corners with heavy borders (10%), double rules from printed forms (3%), **square corners with
-perforated edges (2%)**. Chosen: square corners everywhere; the reply card and the receipt slips
-have a perforated top edge, the letterhead a double rule. No shadows: paper lies flat.
+corners with heavy borders (10%), double rules from printed forms (3%), square corners with
+perforated edges (2%). **Chosen: square corners everywhere; the reply card and the notices carry a
+3 px ink top rule, the letterhead a double rule. No shadows.** The perforated top edge was removed on
+2026-10-25: paper, notebook and receipt styling is banned on every page, and lfm's `design.ground`
+fails torn, zigzag and perforated edges.
 
 **Density.** An airy 680 px column with large gaps (40%), a card grid (20%), a dense three-column
 magazine (5%), **a letter measure (about 34 em, 19 px text on desktop, 18 px on phones) with a

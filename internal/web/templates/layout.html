@@ -25,13 +25,13 @@
 </html>{{end}}
 
 {{define "style"}}<style>
-:root{--paper:#e6edf4;--sheet:#f6f9fb;--ink:#142033;--faded:#46546a;--rule:#9fb0c4;--post:#a3271f;--post-ink:#fff;--air:#1d4a86;
+:root{--ground:#e6edf4;--panel:#f6f9fb;--ink:#142033;--faded:#46546a;--rule:#9fb0c4;--post:#a3271f;--post-ink:#fff;--air:#1d4a86;
 --text:"Iowan Old Style","Palatino Linotype",Palatino,"URW Palladio L",P052,"Book Antiqua",serif;
 --slab:Rockwell,"Rockwell Nova","Roboto Slab","DejaVu Serif","Sitka Small",serif}
-@media (prefers-color-scheme:dark){:root{--paper:#0f1620;--sheet:#172231;--ink:#e3eaf3;--faded:#a6b3c4;--rule:#3a4a5f;--post:#f08a7d;--post-ink:#1a0806;--air:#9cc0f0}}
+@media (prefers-color-scheme:dark){:root{--ground:#0f1620;--panel:#172231;--ink:#e3eaf3;--faded:#a6b3c4;--rule:#3a4a5f;--post:#f08a7d;--post-ink:#1a0806;--air:#9cc0f0}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;background:var(--paper)}
-body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.6 var(--text);font-variant-numeric:oldstyle-nums}
+html{-webkit-text-size-adjust:100%;background:var(--ground)}
+body{margin:0;background:var(--ground);color:var(--ink);font:18px/1.6 var(--text);font-variant-numeric:oldstyle-nums}
 @media (min-width:700px){body{font-size:19px}}
 .wrap{max-width:40rem;margin:0 auto;padding:0 20px}
 main.wrap{padding-top:28px;padding-bottom:32px}
@@ -48,7 +48,7 @@ img{display:block;max-width:100%;height:auto;margin:6px 0}
 ul,ol{margin:0 0 18px;padding-left:1.3em}
 li{margin:0 0 6px}
 blockquote{margin:0 0 18px;padding:0 0 0 1.1em;border-left:1px solid var(--faded);font-style:italic}
-pre{background:var(--sheet);border:1px solid var(--rule);padding:14px 16px;overflow:auto;font-size:15px;line-height:1.5}
+pre{background:var(--panel);border:1px solid var(--rule);padding:14px 16px;overflow:auto;font-size:15px;line-height:1.5}
 code{font:.85em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 table{border-collapse:collapse;width:100%;margin:0 0 22px;font-size:.9em;font-variant-numeric:lining-nums tabular-nums}
 th{font:700 15px/1.3 var(--slab);text-align:left;border-bottom:1px solid var(--ink);padding:6px 12px 6px 0}
@@ -57,11 +57,10 @@ hr{border:0;border-top:1px solid var(--rule);margin:36px 0}
 .lede{font-size:1.15em;line-height:1.5;margin-bottom:30px}
 .meta{font:15px/1.4 var(--slab);color:var(--faded);font-variant-numeric:lining-nums tabular-nums}
 .dateline{text-align:right;margin:0 0 26px}
-.signup,.notice{position:relative;background:var(--sheet);border:1px solid var(--rule);border-top:0;padding:26px 20px 20px;margin:36px 0 40px}
-.signup::before,.notice::before{content:"";position:absolute;left:-1px;right:-1px;top:-5px;height:10px;background:radial-gradient(circle at 7px 5px,var(--paper) 3.5px,var(--rule) 4px,transparent 4.5px) -1px 0/14px 10px repeat-x}
+.signup,.notice{background:var(--panel);border:1px solid var(--rule);border-top:3px solid var(--ink);padding:22px 20px 20px;margin:36px 0 40px}
 .signup label.field{display:block;font:700 15px/1.3 var(--slab);margin:0 0 8px}
 .signup .row{display:flex;gap:10px;flex-wrap:wrap}
-.signup input[type=email]{flex:1 1 220px;min-width:0;min-height:48px;font:inherit;padding:10px 12px;border:1px solid var(--faded);border-radius:0;background:var(--paper);color:var(--ink)}
+.signup input[type=email]{flex:1 1 220px;min-width:0;min-height:48px;font:inherit;padding:10px 12px;border:1px solid var(--faded);border-radius:0;background:var(--ground);color:var(--ink)}
 .signup input[type=email]::placeholder{color:var(--faded);opacity:1}
 button,a.button{display:inline-block;min-height:48px;font:700 17px/1.2 var(--slab);padding:14px 24px;border:0;border-radius:0;background:var(--post);color:var(--post-ink);cursor:pointer;text-decoration:none}
 button:hover,a.button:hover{filter:brightness(1.1)}
