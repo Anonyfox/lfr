@@ -32,13 +32,13 @@
 }
 
 :root {
-  --paper: #f3ecdc;
-  --ink: #1f1b16;
-  --faded: #4f463a;
+  --ground: #e8eef4;
+  --ink: #142033;
+  --faded: #46546a;
   --postmark: #a3271f;
   --airmail: #1d4a86;
-  --rule: #b9ab90;
-  --field: #fbf7ee;
+  --rule: #8fa2b8;
+  --field: #f8fafc;
   --type: "Courier Prime", "Courier New", monospace;
   --edge: 1.5px solid var(--rule);
   --gap: clamp(16px, 4vw, 32px);
@@ -46,14 +46,14 @@
 
 * { box-sizing: border-box; }
 
-html { color-scheme: light; background: var(--paper); color: var(--ink); -webkit-text-size-adjust: 100%; }
+html { color-scheme: light; background: var(--ground); color: var(--ink); -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
   font-family: var(--type);
   font-size: 17px;
   line-height: 1.55;
-  background: var(--paper);
+  background: var(--ground);
   color: var(--ink);
 }
 
@@ -126,7 +126,7 @@ strong { font-weight: 700; }
 .box {
   position: relative;
   border: var(--edge);
-  background: color-mix(in srgb, var(--field) 55%, var(--paper));
+  background: color-mix(in srgb, var(--field) 55%, var(--ground));
   padding: 28px clamp(14px, 3vw, 24px) 18px;
   margin: 0 0 var(--gap);
 }
@@ -140,7 +140,7 @@ strong { font-weight: 700; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--paper);
+  color: var(--ground);
   background: var(--ink);
 }
 
@@ -199,6 +199,7 @@ strong { font-weight: 700; }
 .foot { border-top: 3px double var(--ink); padding-top: 18px; }
 .install { margin-top: 12px; }
 .install code { display: block; width: fit-content; max-width: 100%; padding: 8px 1px; font-size: clamp(12px, 3.05vw, 15px); white-space: nowrap; }
+.install .notes { margin: 4px 0 8px; font-size: 14px; }
 .install-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; font-size: 14px; }
 .install .copy { font-size: 14px; padding: 8px; }
 

@@ -9,12 +9,13 @@
   },
   "socialImage": {
     "src": "assets/images/share.png",
-    "alt": "A typewritten dispatch form titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
+    "alt": "A typewritten dispatch form on grey-blue titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
   },
   "urls": {
     "repo": "https://github.com/Anonyfox/lfr",
     "releases": "https://github.com/Anonyfox/lfr/releases",
     "news": "https://news.lfr.email/",
+    "newsInstall": "https://news.lfr.email/?source=install",
     "operations": "https://github.com/Anonyfox/lfr/blob/main/docs/operations.md",
     "license": "https://github.com/Anonyfox/lfr/blob/main/LICENSE",
     "gmailRules": "https://support.google.com/a/answer/81126",

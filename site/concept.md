@@ -58,7 +58,7 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
 | Axis | Market | Voices | Chosen |
 | --- | --- | --- | --- |
 | Opening | platform, ownership or category claim P001 P005 P008 P011 | the concrete job and why it should exist V044 V038 | the job in one line and the monthly bill under it |
-| Ground | dark ground, white text, one bright accent P001 P003 P014 P016 P018 | voices name paper, envelopes and the postman's job, not dashboards V125 V127 | light paper ground, ink text, postmark red |
+| Ground | dark ground, white text, one bright accent P001 P003 P014 P016 P018 | voices name paper, envelopes and the postman's job, not dashboards V125 V127 | cool grey-blue ground, navy ink, postmark red |
 | Imagery | product UI screenshots and setup videos P005 P006 P007 P010 | people struggle with DNS records and want to see them V071 V077 | the real artifacts: DNS records, received headers, a delivered email |
 | Mechanism | sign-up or free trial P001 P003 P015 P021 | hand the job to software or an agent V038 V058 | the setup sheet with the agent prompt to copy |
 | Proof | logos, user counts, ratings P001 P003 P019 P022 | distrust of hype and venture money V019 V151 V152 | measured numbers and authentication results, no logos |
@@ -93,7 +93,7 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
   The prompt expands into what the agent will do, step by step.
 
 ## Concept
-A setup sheet for the visitor's own domain, laid out like a postal dispatch form on paper: numbered boxes, typewriter fields, a postmark in the corner. Typing a domain fills every box at once: the ten records lfr will print, the server and relay lines of the monthly bill, and the prompt for their agent, ready to copy. The postmarks are not decoration but the authentication results a receiving server writes into an lfr issue (spf=pass, dkim=pass, dmarc=pass), so the proof sits where the doubt is (V048). Port 25 gets its own box with the relay route spelled out, because that is the wall people hit (V041 V045), and the bill shows the whole cost in the unit people count in, a $5 VPS (V044 V063). The sparks recur in the sheet's boxes: the price unit in the bill, the blocked port in the route box, the last-hop relay in the route line, the "why doesn't this exist" job in the opening.
+A setup sheet for the visitor's own domain, laid out like a post office dispatch form on a cool grey-blue ground: numbered boxes, typewriter fields, a postmark in the corner. Typing a domain fills every box at once: the ten records lfr will print, the server and relay lines of the monthly bill, and the prompt for their agent, ready to copy. The postmarks are not decoration but the authentication results a receiving server writes into an lfr issue (spf=pass, dkim=pass, dmarc=pass), so the proof sits where the doubt is (V048). Port 25 gets its own box with the relay route spelled out, because that is the wall people hit (V041 V045), and the bill shows the whole cost in the unit people count in, a $5 VPS (V044 V063). The sparks recur in the sheet's boxes: the price unit in the bill, the blocked port in the route box, the last-hop relay in the route line, the "why doesn't this exist" job in the opening.
 
 ## Spine
 1. Header: the job in one line, the bill in one line under it, and the domain field that fills the sheet. V044 V016
@@ -109,13 +109,13 @@ A setup sheet for the visitor's own domain, laid out like a postal dispatch form
 ## Palette
 | Role | Color | Source |
 | --- | --- | --- |
-| Paper ground | #f3ecdc | manila dispatch forms and envelopes, the postal idiom no peer uses (gap in research) |
-| Ink text | #1f1b16 | typewriter ribbon black on paper |
-| Faded ink | #4f463a | carbon copy text for notes and labels |
+| Ground | #e8eef4 | the grey-blue of a post office counter form; the postal idiom no peer uses (gap in research), kept cool because warm off-white grounds are banned |
+| Ink text | #142033 | navy typewriter ribbon |
+| Faded ink | #46546a | carbon copy text for notes and labels |
 | Postmark red | #a3271f | cancellation stamps; used for stamps and the primary action |
 | Airmail blue | #1d4a86 | airmail stripes; links and field focus |
-| Form rule | #b9ab90 | printed lines of a form |
-| Field ground | #fbf7ee | the white of a filled-in field |
+| Form rule | #8fa2b8 | printed lines of a form |
+| Field ground | #f8fafc | the white of a filled-in field |
 
 ## Type
 | Role | Family | Source |
@@ -123,7 +123,7 @@ A setup sheet for the visitor's own domain, laid out like a postal dispatch form
 | Everything | Courier Prime, Courier New, monospace | typewriter of filled-in dispatch forms; mono keeps DNS records, headers and prompts aligned (V071) |
 
 ## Form
-A single sheet, max 72 characters wide, centered on the paper ground, with numbered boxes drawn as 1.5px ruled frames with square corners, like boxes on a printed form. Labels sit small and uppercase in the top-left corner of each box. Fields are typewriter text on a slightly whiter ground with a ruled baseline. No shadows, no rounded cards; the only depth is the rotated postmark stamps overlapping box edges. On phones the sheet fills the width with a 16px margin and boxes stack.
+A single sheet, max 72 characters wide, centered on the grey-blue ground, with numbered boxes drawn as 1.5px ruled frames with square corners, like boxes on a printed form. Labels sit small and uppercase in the top-left corner of each box. Fields are typewriter text on a slightly whiter ground with a ruled baseline. No shadows, no rounded cards; the only depth is the rotated postmark stamps overlapping box edges. On phones the sheet fills the width with a 16px margin and boxes stack.
 
 ## Imagery
 | Image | Job | Art direction | Source |
@@ -147,3 +147,4 @@ Reduced motion: the stamps are simply present; fields update without transitions
 - 2026-10-20: first concept from research batch 2026-10-20 (178 voices, 26 peers).
 - 2026-10-20: Box 2 shows the route without received headers until a real lfr issue reached Gmail; the postmarks stay as the stamp motif.
 - 2026-10-23: move the install line below the header form, with a copy button and a plain Star on GitHub link; keep the footer links without repeating the command (V058 V125). Resolve the stale received-header question to match the 2026-10-20 decision.
+- 2026-10-25: cool grey-blue ground, navy ink and grey-blue rules replace the warm manila palette, which the design.ground rule bans; a one-line release-notes link sits directly under the install line.
