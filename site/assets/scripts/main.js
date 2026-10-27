@@ -50,11 +50,18 @@
     document.getElementById("b-mails").textContent = mails.toLocaleString("en-US");
     document.getElementById("b-relay").textContent = money(relay);
     document.getElementById("b-total").textContent = money(bill.server + relay);
-    document.getElementById("b-server").textContent = money(bill.server);
-    document.getElementById("hero-mails").textContent = mails.toLocaleString("en-US");
-    document.getElementById("hero-relay").textContent = money(relay);
-    document.getElementById("hero-total").textContent = money(bill.server + relay);
-    document.getElementById("hero-server").textContent = money(bill.server);
+    document.getElementById("readers-out").textContent = readers.toLocaleString("en-US");
+    document.getElementById("issues-out").textContent = issues;
+    var scale = 490 / Math.max(49, bill.server + relay);
+    document.querySelectorAll(".bars rect").forEach(function (bar, i) {
+      bar.setAttribute("width", [bill.server + relay, 49, 9, 33, 35][i] * scale);
+    });
+    document.querySelector(".chart-labels text").textContent = "lfr · $" + money(bill.server + relay);
+    document.getElementById("tier-note").textContent =
+      "beehiiv: $49 at 1,000 readers, billed yearly" + (readers > 1000 ? " (above the stated tier). " : " (stated tier). ") +
+      "Buttondown: " + (readers <= 100 ? "free to 100. " : "above the free tier; $9 / $29 paid tier limits unstated. ") +
+      "Kit: " + (readers <= 10000 ? "free to 10,000; paid from $33. " : "above the stated free tier; paid from $33. ") +
+      "Ghost: software free, Mailgun from $35; server extra. Bars show stated paid prices, not quotes for your list.";
   }
 
   var shownDomain = "";
@@ -74,7 +81,7 @@
     var valid = hostRE.test(raw);
     domainInput.setAttribute("aria-invalid", raw && !valid ? "true" : "false");
     var domain = valid ? raw : example.domain;
-    var readers = clamp(readersInput.value, 1, 10000000, example.readers);
+    var readers = clamp(readersInput.value, 1, 15000, example.readers);
     var issues = clamp(issuesInput.value, 1, 60, example.issues);
     render(domain, readers, issues);
     if (fromInput) {
@@ -91,13 +98,19 @@
   // Restore a shared sheet.
   var params = new URLSearchParams(location.search);
   if (params.has("domain")) domainInput.value = cleanDomain(params.get("domain"));
-  if (params.has("readers")) readersInput.value = clamp(params.get("readers"), 1, 10000000, example.readers);
+  if (params.has("readers")) readersInput.value = clamp(params.get("readers"), 1, 15000, example.readers);
   if (params.has("issues")) issuesInput.value = clamp(params.get("issues"), 1, 60, example.issues);
   update(false);
   shownDomain = cleanDomain(domainInput.value);
 
   [domainInput, readersInput, issuesInput].forEach(function (el) {
     el.addEventListener("input", function () { update(true); });
+  });
+  document.getElementById("replay").addEventListener("click", function replay() {
+    var terminal = document.getElementById("terminal");
+    var clone = terminal.cloneNode(true);
+    terminal.replaceWith(clone);
+    clone.querySelector("#replay").addEventListener("click", replay);
   });
   document.getElementById("fill").addEventListener("submit", function (e) {
     e.preventDefault();

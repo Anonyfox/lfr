@@ -109,13 +109,13 @@ A setup sheet for the visitor's own domain, presented as the records a receiving
 ## Palette
 | Role | Color | Source |
 | --- | --- | --- |
-| Ground | #ffffff | white digital reading surface for records V071 V077 |
-| Ink text | #142033 | navy for technical text V071 |
-| Secondary text | #46546a | notes and labels V125 |
-| Primary action | #a3271f | install and prompt copy buttons V058 |
-| Links and focus | #1d4a86 | visible navigation and keyboard focus V058 |
-| Panel rule | #8fa2b8 | separates records and controls V071 |
-| Pass results | #0f7b3f | receiver authentication checks V048 V143 |
+| Ground | #ffffff | white digital records V071 |
+| Ink | #142033 | technical reading V071 |
+| Secondary | #46546a | captions V125 |
+| Terminal ground | #0b1016 | real terminal output V058 |
+| Neon accent | #22d3ee | terminal command distinction V058 |
+| Cyan ink | #08778a | readable cyan links on white V071 |
+| Rules | #8fa2b8 | record boundaries V077 |
 
 ## Type
 | Role | Family | Source |
@@ -124,19 +124,26 @@ A setup sheet for the visitor's own domain, presented as the records a receiving
 | Records, commands, prompt and numbers | ui-monospace, SF Mono, Menlo, Consolas, monospace | DNS and command alignment V071 V058 |
 
 ## Form
-White panels with 1.5px navy-grey rules, square corners, no shadows, textures or rotation. Plain mono step numbers 01–06. At 64rem and wider the hero uses two columns within 72rem: setup controls and install at left, live monthly bill at right. DNS rows use type, name, value and explanation columns. Other text stays near 46rem; the issue section widens for text beside a 24rem by 40rem phone-width preview with a 2px navy frame. On phones rows stack, the route runs vertically, and commands wrap in full. V071 V077 V026
+White ground, system sans and mono. A near-black opening band puts the real setup transcript next to the delivered issue in a CSS phone frame. One electric cyan accent; darker cyan on white. Square ruled panels, a ten-record grid, large HUD bill numbers and horizontal comparison bars replace paragraphs. Mobile stacks headline, terminal and phone without clipping; DNS cards collapse to one column. V058 V071 V026
 
 ## Imagery
 | Image | Job | Art direction | Source |
 | --- | --- | --- | --- |
-| Delivered issue | show what readers get | real HTML eagerly rendered in a square phone-width navy frame V026 | rendered by lfr |
-
-Authentication results use HTML status chips, with a note about receiver checks (V048 V143). The share preview uses the same white ground, navy system sans heading, mono DNS records and green pass chips, rendered from HTML (V071 V048). These are interface elements and sharing metadata rather than page images.
+| Hero terminal and phone | setup and delivered proof | real transcript and screenshot at phone width V058 V026 | lfr 0.2.5 scratch run and issue-phone-390.webp |
+| Bill chart | compare stated costs | horizontal bars with explicit tier limits V016 V145 | existing pricing data |
+| Records circuit | map ten DNS records | type badges and names around a fine circuit SVG V071 V077 | lfr domain add |
+| Route diagram | explain blocked port detour | VPS to relay to inbox, blocked direct route V041 V127 | inline SVG |
+| Floor circuit | show enforced safeguards | linked policy thresholds alongside compact disclosures V084 V105 | inline SVG |
+| Agent circuit | connect prompt to checks | command path from setup to doctor to check V058 | inline SVG |
 
 ## Motion
-Moment: a short highlight flash on DNS records whose domain changes. V071 V077
-Feedback: every field updates as the visitor types; copy buttons change to "copied" for two seconds. V058
-Reduced motion: fields update without animation.
+Intensity: immersive
+Intensity reason: the real setup output and delivered issue make the work visible to operators who ask to see DNS and agent setup. V071 V077 V058
+Moment: headline glitch reveal once in 600ms; terminal commands type and output appears in sequence over 4.8 seconds, then stops.
+Moment: route path draws through the relay as its section crosses the viewport using a view timeline.
+Moment: bill bars reveal horizontally on scroll with a view timeline.
+Feedback: domain edits flash the affected records; slider edits update numbers and bars; copy confirms; Replay restarts the terminal. V071 V058
+Reduced motion: headline and terminal show their final frames; route and bars stay complete; records update without flashes; copy and slider results remain immediate.
 
 ## Copy
 - Use: "$5 VPS", "port 25", "relay", "DNS records", "deliverability", "Markdown" V044 V045 V127 V071 V048 V146
@@ -151,3 +158,5 @@ Reduced motion: fields update without animation.
 - 2026-10-25: cool grey-blue ground, navy ink and grey-blue rules replace the warm manila palette, which the design.ground rule bans; a one-line release-notes link sits directly under the install line.
 
 - 2026-10-27: visual review: the paper dispatch form goes (ROUTING rule 14): white ground, system sans and mono, pass results as status chips, wide hero with a live bill, route as a diagram.
+
+- 2026-10-27: visual pass 2: cyan terminal band, real setup and delivered issue above the fold, one interactive cost chart, DNS grid and relay SVG; immersive motion with static reduced-motion frames. V058 V071 V026 V145
