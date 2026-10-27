@@ -20,8 +20,9 @@
 <main class="sheet">
 
 <header class="masthead">
-  <p class="form-id">Form LFR-1 · Dispatch sheet for one domain</p>
-  <h1>Your own mail server for your domains, with newsletters and their websites, from one binary on {{.data.bill.serverLabel}}.</h1>
+  <div class="hero-setup">
+  <p class="form-id" data-design-reason="The concept specifies a plain mono product kicker for this technical setup page.">lfr · self-hosted mail for your domains</p>
+  <h1 data-design-reason="The concept uses system UI sans for both headings and reading text to present the receiver records as a crisp digital interface.">Your own mail server for your domains, with newsletters and their websites, from one binary on {{.data.bill.serverLabel}}.</h1>
   <p class="bill-line">Your agent runs it from the terminal, and you pay for the server plus <span class="nowrap">${{.data.bill.sesPerThousand}}</span> per thousand mails.</p>
   <form class="fill" id="fill" action="#records">
     <p class="fill-title">Fill in the sheet for your domain</p>
@@ -38,18 +39,25 @@
     <p class="notes"><a href="{{.urls.newsInstall}}">Get release notes by email</a></p>
     <div class="install-actions"><button type="button" class="copy" data-copy="install-command">Copy install command</button> <a href="{{.urls.repo}}">Star on GitHub</a></div>
   </div>
-  <div class="stamps" aria-hidden="true">
-    <svg class="stamp s1" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">spf=pass</text></svg>
-    <svg class="stamp s2" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dkim=pass</text></svg>
-    <svg class="stamp s3" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dmarc=pass</text></svg>
   </div>
+  <aside class="hero-bill" aria-labelledby="hero-bill-h">
+    <h2 id="hero-bill-h">Your month</h2>
+    <dl>
+      <div><dt>Server ({{.data.bill.serverLabel}})</dt><dd>$<span id="hero-server">{{.data.bill.server}}.00</span></dd></div>
+      <div><dt>Relay: <span id="hero-mails">4,000</span> mails × ${{.data.bill.sesPerThousand}} per thousand (Amazon SES)</dt><dd>$<span id="hero-relay">{{.data.bill.exampleRelay}}</span></dd></div>
+      <div><dt>lfr</dt><dd>$0.00</dd></div>
+    </dl>
+    <p class="hero-total" data-design-reason="The concept uses monospace for calculated bill numbers.">$<span id="hero-total">{{.data.bill.exampleTotal}}</span><span> / month</span></p>
+  </aside>
 </header>
 
 <section class="box" id="records" aria-labelledby="records-h">
-  <p class="box-no">Box 1</p>
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">01</p>
   <h2 id="records-h">The ten DNS records for <span class="d">{{.data.example.domain}}</span></h2>
   <p>That's all the DNS work there is: <code>lfr domain add</code> prints these with real keys made on your server, plus a zone snippet Cloudflare can import.</p>
-  <ol class="records" id="record-list">
+  <div class="results" data-design-reason="These mono chips use the authentication result syntax a receiver writes."><span>spf=pass</span><span>dkim=pass</span><span>dmarc=pass</span></div>
+  <p class="note">These are the checks a receiver runs against these records.</p>
+  <ol class="records" data-design-reason="DNS record types, names and values use monospace as technical data per the concept." id="record-list">
     <li><span class="t">A</span><span class="n">mail.<span class="d">example.com</span></span><span class="v">your server's IPv4</span><span class="w">the mail host; its reverse DNS must say the same name</span></li>
     <li><span class="t">TXT</span><span class="n">mail.<span class="d">example.com</span></span><span class="v">v=spf1 a -all</span><span class="w">SPF for the mail host itself, checked on its greeting and bounces</span></li>
     <li><span class="t">MX</span><span class="n"><span class="d">example.com</span></span><span class="v">10 mail.<span class="d">example.com</span></span><span class="w">mail for the domain comes to lfr</span></li>
@@ -65,23 +73,20 @@
 </section>
 
 <section class="box" id="route" aria-labelledby="route-h">
-  <p class="box-no">Box 2</p>
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">02</p>
   <h2 id="route-h">How mail leaves a server whose port 25 is blocked</h2>
   <p>DigitalOcean blocks port 25 for new accounts. Vultr blocks it for young ones. Google Cloud blocks it, period. So lfr signs every mail itself and gives it to a relay for the last hop, on a port they leave open. Your mailboxes, lists, archive and readers stay on your server. The relay only carries the mail the final mile and keeps its IP clean, which is its whole job.</p>
-  <pre class="route" aria-label="Route of one issue"><span class="hop">1. lfr on your $5 VPS</span>
-   signs with <span class="d">example.com</span>'s DKIM keys
-   |  smtps on port 2465 (SES) or 8465 (SMTP2GO)
-<span class="hop">2. relay</span>
-   the last hop; keeps its IP reputation
-   |  port 25
-<span class="hop">3. reader's inbox</span>
-   checks SPF, DKIM and DMARC against your records</pre>
+  <ol class="route" aria-label="Route of one issue">
+    <li><div class="route-node"><strong>lfr on your {{.data.bill.serverLabel}}</strong><span>signs with <span class="d">example.com</span>'s DKIM keys</span></div><div class="connector">smtps on port 2465 (SES) or 8465 (SMTP2GO)<span aria-hidden="true">→</span></div></li>
+    <li><div class="route-node"><strong>relay</strong><span>the last hop; keeps its IP reputation</span></div><div class="connector">port 25<span aria-hidden="true">→</span></div></li>
+    <li><div class="route-node"><strong>reader's inbox</strong><span>checks SPF, DKIM and DMARC against your records</span></div></li>
+  </ol>
   <p>With port 25 open and a clean IP, lfr delivers directly; <code>lfr relay</code> tells you which case you're in.</p>
   <p class="note">The honest part about deliverability: a brand-new domain gets distrusted for a few weeks and Outlook junks small senders more than anyone, so lfr sends at a steady pace and pauses a list by itself at 0.3% complaints, where <a href="{{.urls.gmailRules}}">Gmail's sender rules</a> draw the line.</p>
 </section>
 
 <section class="box" id="bill" aria-labelledby="bill-h">
-  <p class="box-no">Box 3</p>
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">03</p>
   <h2 id="bill-h">The monthly bill</h2>
   <table class="ledger">
     <tbody>
@@ -102,19 +107,21 @@
 </section>
 
 <section class="box" id="issue" aria-labelledby="issue-h">
-  <p class="box-no">Box 4</p>
+  <div class="issue-copy">
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">04</p>
   <h2 id="issue-h">What your readers get</h2>
   <p>You write an issue in Markdown, and readers get a plain email that works on a phone, in dark mode and with images off.</p>
   <p>Each footer says when and where that reader signed up, and unsubscribing takes one click: no login, no survey, no "sorry to see you go" mail.</p>
   <p>This is lfr's own first notes issue, as lfr renders it:</p>
+  </div>
   <figure class="mail">
     <figcaption><span>From: {{.data.issue.from}}</span><span>Subject: {{.data.issue.subject}}</span></figcaption>
-    <iframe title="The notes issue as a reader receives it" srcdoc="{{.data.issue.html}}" loading="lazy" sandbox></iframe>
+    <iframe title="The notes issue as a reader receives it" srcdoc="{{.data.issue.html}}" sandbox></iframe>
   </figure>
 </section>
 
 <section class="box" id="floor" aria-labelledby="floor-h">
-  <p class="box-no">Box 5</p>
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">05</p>
   <h2 id="floor-h">What lfr refuses to get wrong</h2>
   <ul class="checklist">
     <li>Double opt-in for every signup, with the frequency stated on the form and in the confirmation mail.</li>
@@ -130,7 +137,7 @@
 </section>
 
 <section class="box" id="agent" aria-labelledby="agent-h">
-  <p class="box-no">Box 6</p>
+  <p class="box-no" data-design-reason="The concept uses mono step numbers to mark the setup sequence.">06</p>
   <h2 id="agent-h">The prompt for your agent</h2>
   <p>lfr comes with skills that teach an agent the whole job, from DNS to the welcome mail to the replies.</p>
   <p>Every command prints the next step, and <code>lfr check</code> won't let a draft out that breaks your newsletter's own brief.</p>

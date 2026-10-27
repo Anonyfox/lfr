@@ -9,7 +9,7 @@
   },
   "socialImage": {
     "src": "assets/images/share.png",
-    "alt": "A typewritten dispatch form on grey-blue titled lfr with ten DNS records for example.com and red postmarks reading spf=pass, dkim=pass and dmarc=pass."
+    "alt": "A white lfr preview with a navy heading, DNS records for example.com in monospace and green status chips reading spf=pass, dkim=pass and dmarc=pass."
   },
   "urls": {
     "repo": "https://github.com/Anonyfox/lfr",

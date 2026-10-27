@@ -1,47 +1,21 @@
 <!doctype html>
-<!-- Source of assets/images/share.png. Render at 1200x630:
-     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars \
-       --window-size=1200,630 --screenshot=assets/images/share.png assets/share/card.html -->
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<style>
-@font-face { font-family: "Courier Prime"; src: url("../fonts/courier-prime-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
-@font-face { font-family: "Courier Prime"; src: url("../fonts/courier-prime-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
-:root { --ground: #e8eef4; --ink: #142033; --faded: #46546a; --postmark: #a3271f; --rule: #8fa2b8; --field: #f8fafc; }
-* { box-sizing: border-box; margin: 0; }
-html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--ground); color: var(--ink); font-family: "Courier Prime", monospace; }
-.card { position: absolute; inset: 40px 56px; }
-.id { font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faded); }
-h1 { font-size: 64px; line-height: 1.1; margin: 14px 0 22px; max-width: 760px; }
-.records { border: 2px solid var(--rule); background: var(--field); padding: 14px 20px; font-size: 22px; line-height: 1.5; width: 820px; }
-.records b { color: var(--postmark); display: inline-block; width: 90px; }
-.stamps { position: absolute; right: 0; top: 0; }
-.stamp { width: 190px; height: 190px; fill: none; stroke: var(--postmark); stroke-width: 3.5; opacity: 0.9; position: absolute; }
-.stamp circle + circle { stroke-width: 1.8; stroke-dasharray: 5 4; }
-.stamp text { fill: var(--postmark); stroke: none; font: 700 13.5px "Courier Prime", monospace; text-anchor: middle; }
-.s1 { right: 10px; top: 0; transform: rotate(-12deg); }
-.s2 { right: 120px; top: 150px; transform: rotate(8deg); }
-.s3 { right: 0; top: 300px; transform: rotate(-5deg); }
-.foot { position: absolute; bottom: 0; left: 0; font-size: 26px; font-weight: 700; }
-</style>
-</head>
-<body>
-<div class="card">
-  <p class="id">lfr.email · Form LFR-1</p>
-  <h1>Newsletters and mailboxes on a $5 VPS</h1>
-  <div class="records">
-    <div><b>MX</b>example.com → mail.example.com</div>
-    <div><b>TXT</b>v=spf1 a:mail.example.com ~all</div>
-    <div><b>TXT</b>lfr2610e._domainkey · k=ed25519</div>
-    <div><b>TXT</b>_dmarc · v=DMARC1; p=none</div>
-  </div>
-  <p class="foot">Ten DNS records. One binary. Your agent runs it.</p>
-  <div class="stamps">
-    <svg class="stamp s1" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">spf=pass</text></svg>
-    <svg class="stamp s2" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dkim=pass</text></svg>
-    <svg class="stamp s3" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="44"/><text x="60" y="65">dmarc=pass</text></svg>
-  </div>
-</div>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><title>lfr share preview</title><style>html,body{margin:0;width:1200px;height:630px;background:#ffffff}svg{display:block}</style></head><body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Newsletters and mailboxes on a $5 VPS</title>
+<desc id="desc">DNS records for example.com with green receiver status chips on white.</desc>
+<rect width="1200" height="630" fill="#ffffff"/>
+<g fill="#142033" font-family="sans-serif">
+<text x="56" y="64" font-family="monospace" font-size="22" fill="#46546a">lfr.email · self-hosted mail for your domains</text>
+<g font-size="60" font-weight="700"><text x="56" y="146">Newsletters and mailboxes</text><text x="56" y="212">on a $5 VPS</text></g>
+<rect x="56" y="244" width="1088" height="166" fill="#ffffff" stroke="#8fa2b8" stroke-width="1.5"/>
+<g font-family="monospace" font-size="22">
+<text x="76" y="278">MX      example.com → mail.example.com</text>
+<text x="76" y="314">TXT     v=spf1 a:mail.example.com include:amazonses.com ~all</text>
+<text x="76" y="350">TXT     lfr2610e._domainkey · k=ed25519</text>
+<text x="76" y="386">TXT     _dmarc · v=DMARC1; p=none</text>
+</g>
+<g fill="#0f7b3f"><rect x="56" y="434" width="150" height="46"/><rect x="218" y="434" width="164" height="46"/><rect x="394" y="434" width="178" height="46"/></g>
+<g fill="#ffffff" font-family="monospace" font-size="22"><text x="68" y="464">spf=pass</text><text x="230" y="464">dkim=pass</text><text x="406" y="464">dmarc=pass</text></g>
+<text x="56" y="580" font-size="26" font-weight="700">Your agent sets it up from the terminal.</text>
+</g></svg>
+</body></html>

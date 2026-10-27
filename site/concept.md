@@ -58,7 +58,7 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
 | Axis | Market | Voices | Chosen |
 | --- | --- | --- | --- |
 | Opening | platform, ownership or category claim P001 P005 P008 P011 | the concrete job and why it should exist V044 V038 | the job in one line and the monthly bill under it |
-| Ground | dark ground, white text, one bright accent P001 P003 P014 P016 P018 | voices name paper, envelopes and the postman's job, not dashboards V125 V127 | cool grey-blue ground, navy ink, postmark red |
+| Ground | dark ground, white text, one bright accent P001 P003 P014 P016 P018 | plain technical work and the last-hop relay V125 V127 | pure white ground, navy ink, green pass results; red primary buttons |
 | Imagery | product UI screenshots and setup videos P005 P006 P007 P010 | people struggle with DNS records and want to see them V071 V077 | the real artifacts: DNS records, received headers, a delivered email |
 | Mechanism | sign-up or free trial P001 P003 P015 P021 | hand the job to software or an agent V038 V058 | the setup sheet with the agent prompt to copy |
 | Proof | logos, user counts, ratings P001 P003 P019 P022 | distrust of hype and venture money V019 V151 V152 | measured numbers and authentication results, no logos |
@@ -77,8 +77,8 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
   A split screen: writer's Markdown left, reader's inbox right, animated delivery.
 2. Terminal theatre: a dark terminal replaying an agent installing lfr, green text. V058 → struck: second direction, and dark ground with one bright accent is the market baseline.
   The replay pauses for the visitor to type their domain.
-3. Setup sheet: a postal dispatch form for the visitor's domain: records, bill, prompt, stamped with SPF, DKIM and DMARC pass. V044 V071 → chosen
-  The sheet is the page: each section is a numbered box of the form; the stamps are the received headers of a real lfr mail.
+3. Setup sheet: a digital view of the visitor's domain: records, live bill and prompt, with SPF, DKIM and DMARC status chips. V044 V071 → chosen
+  The page shows what a receiving mail server checks, with numbered steps and a relay diagram. V048 V143
 4. Port 25 map: a world map of hosting providers that block port 25, with the relay route drawn as a detour. V045 V090 → struck: a strong spark but a single fact; the visitor's own domain is missing.
   Hover each provider for its block policy and the alternate ports.
 5. Receipt: the page as a till receipt itemising what beehiiv charges against what lfr costs. V016 V145 → struck: proves only price, and pits lfr against one peer.
@@ -93,13 +93,13 @@ Release: public at github.com/Anonyfox/lfr since 2026-10-20, v0.1.0 with Linux a
   The prompt expands into what the agent will do, step by step.
 
 ## Concept
-A setup sheet for the visitor's own domain, laid out like a post office dispatch form on a cool grey-blue ground: numbered boxes, typewriter fields, a postmark in the corner. Typing a domain fills every box at once: the ten records lfr will print, the server and relay lines of the monthly bill, and the prompt for their agent, ready to copy. The postmarks are not decoration but the authentication results a receiving server writes into an lfr issue (spf=pass, dkim=pass, dmarc=pass), so the proof sits where the doubt is (V048). Port 25 gets its own box with the relay route spelled out, because that is the wall people hit (V041 V045), and the bill shows the whole cost in the unit people count in, a $5 VPS (V044 V063). The sparks recur in the sheet's boxes: the price unit in the bill, the blocked port in the route box, the last-hop relay in the route line, the "why doesn't this exist" job in the opening.
+A setup sheet for the visitor's own domain, presented as the records a receiving mail server checks on a pure white ground. System sans text and mono records sit in square, ruled panels. Typing a domain fills the ten records lfr will print, the live server and relay bill beside the opening, and the prompt for their agent, ready to copy (V071 V077). Green status chips show the checks a receiver runs against those records, without claiming a live delivery test (V048 V143). The blocked port and last-hop relay have a diagram (V041 V045 V127); the bill uses the $5 VPS unit people count in (V044 V063). At desktop the hero and records span the page; the delivered issue sits beside its explanation in a phone-width frame (V026).
 
 ## Spine
 1. Header: the job in one line, the bill in one line under it, and the domain field that fills the sheet. V044 V016
 2. Box 1, records: the ten DNS records for the typed domain, each with what it does; keys marked as generated on the server. V071 V077
-3. Box 2, route: how mail leaves a VPS whose port 25 is blocked: the relay for the last hop, alternate ports, and the received headers stamped pass. V041 V045 V127 V072
-  Show the route without received headers until a real lfr issue reaches Gmail; the postmarks remain the stamp motif (V048 V143).
+3. Box 2, route: how mail leaves a VPS whose port 25 is blocked: the relay for the last hop, alternate ports, and the receiver checks. V041 V045 V127 V072
+  Show the route without received headers until a real lfr issue reaches Gmail; status chips describe receiver checks (V048 V143).
 4. Box 3, bill: server, relay and domain lines for the visitor's readers and sends, next to what tier pricing charges for the same list. V016 V022 V145
 5. Box 4, the issue: the email a reader receives, rendered, with the footer saying when and where they signed up and the one-click unsubscribe. V026 V120
 6. Box 5, the floor: what lfr refuses to get wrong (double opt-in, unsubscribe, bounces, complaint pause, no tracking by default, no admin UI). V084 V105 V151
@@ -109,38 +109,39 @@ A setup sheet for the visitor's own domain, laid out like a post office dispatch
 ## Palette
 | Role | Color | Source |
 | --- | --- | --- |
-| Ground | #e8eef4 | the grey-blue of a post office counter form; the postal idiom no peer uses (gap in research), kept cool because warm off-white grounds are banned |
-| Ink text | #142033 | navy typewriter ribbon |
-| Faded ink | #46546a | carbon copy text for notes and labels |
-| Postmark red | #a3271f | cancellation stamps; used for stamps and the primary action |
-| Airmail blue | #1d4a86 | airmail stripes; links and field focus |
-| Form rule | #8fa2b8 | printed lines of a form |
-| Field ground | #f8fafc | the white of a filled-in field |
+| Ground | #ffffff | white digital reading surface for records V071 V077 |
+| Ink text | #142033 | navy for technical text V071 |
+| Secondary text | #46546a | notes and labels V125 |
+| Primary action | #a3271f | install and prompt copy buttons V058 |
+| Links and focus | #1d4a86 | visible navigation and keyboard focus V058 |
+| Panel rule | #8fa2b8 | separates records and controls V071 |
+| Pass results | #0f7b3f | receiver authentication checks V048 V143 |
 
 ## Type
 | Role | Family | Source |
 | --- | --- | --- |
-| Everything | Courier Prime, Courier New, monospace | typewriter of filled-in dispatch forms; mono keeps DNS records, headers and prompts aligned (V071) |
+| Reading and headings | system-ui, -apple-system, Segoe UI, Roboto, sans-serif | direct technical reading V125 V071 |
+| Records, commands, prompt and numbers | ui-monospace, SF Mono, Menlo, Consolas, monospace | DNS and command alignment V071 V058 |
 
 ## Form
-A single sheet, max 72 characters wide, centered on the grey-blue ground, with numbered boxes drawn as 1.5px ruled frames with square corners, like boxes on a printed form. Labels sit small and uppercase in the top-left corner of each box. Fields are typewriter text on a slightly whiter ground with a ruled baseline. No shadows, no rounded cards; the only depth is the rotated postmark stamps overlapping box edges. On phones the sheet fills the width with a 16px margin and boxes stack.
+White panels with 1.5px navy-grey rules, square corners, no shadows, textures or rotation. Plain mono step numbers 01–06. At 64rem and wider the hero uses two columns within 72rem: setup controls and install at left, live monthly bill at right. DNS rows use type, name, value and explanation columns. Other text stays near 46rem; the issue section widens for text beside a 24rem by 40rem phone-width preview with a 2px navy frame. On phones rows stack, the route runs vertically, and commands wrap in full. V071 V077 V026
 
 ## Imagery
 | Image | Job | Art direction | Source |
 | --- | --- | --- | --- |
-| Postmarks | proof: authentication results as stamps | circular red cancellation marks with "spf=pass", "dkim=pass", "dmarc=pass" and the date, slightly rotated, ink texture by uneven stroke V048 V143 | drawn as inline SVG |
-| Delivered issue | show what readers get | the real HTML of an lfr issue in a framed phone-width box, light mode V026 | rendered by lfr |
-| Share preview | share preview | the sheet's header with domain field filled, postmark in the corner | rendered from the page |
+| Delivered issue | show what readers get | real HTML eagerly rendered in a square phone-width navy frame V026 | rendered by lfr |
+
+Authentication results use HTML status chips, with a note about receiver checks (V048 V143). The share preview uses the same white ground, navy system sans heading, mono DNS records and green pass chips, rendered from HTML (V071 V048). These are interface elements and sharing metadata rather than page images.
 
 ## Motion
-Moment: when the visitor finishes typing a domain, the three postmarks press onto the sheet one after another, 120 ms apart, with a small rotation settle.
-Feedback: every field updates as the visitor types; copy buttons change to "copied" for two seconds.
-Reduced motion: the stamps are simply present; fields update without transitions.
+Moment: a short highlight flash on DNS records whose domain changes. V071 V077
+Feedback: every field updates as the visitor types; copy buttons change to "copied" for two seconds. V058
+Reduced motion: fields update without animation.
 
 ## Copy
 - Use: "$5 VPS", "port 25", "relay", "DNS records", "deliverability", "Markdown" V044 V045 V127 V071 V048 V146
 - Avoid: "grow", "monetize", "creator economy", "AI-powered", "revolutionary", "seamless" V152 V151 V019
-- Tone: a postal clerk filling the form for you: plain, exact, numbers before adjectives, and honest about what lfr cannot fix: a brand-new domain needs weeks, Microsoft may still junk mail, a relay is part of the route. V122 V125 V073
+- Tone: a technical operator explaining the setup: plain, exact, numbers before adjectives, and honest about what lfr cannot fix: a brand-new domain needs weeks, Microsoft may still junk mail, a relay is part of the route. V122 V125 V073
 - Every claim is something the visitor can check: a command, a record, a header, a number. V074 V141
 
 ## Changelog
@@ -148,3 +149,5 @@ Reduced motion: the stamps are simply present; fields update without transitions
 - 2026-10-20: Box 2 shows the route without received headers until a real lfr issue reached Gmail; the postmarks stay as the stamp motif.
 - 2026-10-23: move the install line below the header form, with a copy button and a plain Star on GitHub link; keep the footer links without repeating the command (V058 V125). Resolve the stale received-header question to match the 2026-10-20 decision.
 - 2026-10-25: cool grey-blue ground, navy ink and grey-blue rules replace the warm manila palette, which the design.ground rule bans; a one-line release-notes link sits directly under the install line.
+
+- 2026-10-27: visual review: the paper dispatch form goes (ROUTING rule 14): white ground, system sans and mono, pass results as status chips, wide hero with a live bill, route as a diagram.

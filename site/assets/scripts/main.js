@@ -11,7 +11,7 @@
   var domainInput = document.getElementById("domain");
   var readersInput = document.getElementById("readers");
   var issuesInput = document.getElementById("issues");
-  var stamps = document.querySelector(".stamps");
+  var records = document.getElementById("record-list");
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var hostRE = /^(?=.{1,253}$)(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/;
@@ -51,16 +51,22 @@
     document.getElementById("b-relay").textContent = money(relay);
     document.getElementById("b-total").textContent = money(bill.server + relay);
     document.getElementById("b-server").textContent = money(bill.server);
+    document.getElementById("hero-mails").textContent = mails.toLocaleString("en-US");
+    document.getElementById("hero-relay").textContent = money(relay);
+    document.getElementById("hero-total").textContent = money(bill.server + relay);
+    document.getElementById("hero-server").textContent = money(bill.server);
   }
 
-  var pressed = "";
-  var timer = 0;
-  function press(domain) {
-    if (reduced || !stamps || domain === pressed) return;
-    pressed = domain;
-    stamps.classList.remove("press");
-    void stamps.offsetWidth;
-    stamps.classList.add("press");
+  var shownDomain = "";
+  function highlight(domain) {
+    if (domain === shownDomain) return;
+    shownDomain = domain;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    records.querySelectorAll("li:has(.d)").forEach(function (row) {
+      row.classList.remove("changed");
+      void row.offsetWidth;
+      row.classList.add("changed");
+    });
   }
 
   function update(fromInput) {
@@ -78,8 +84,7 @@
       if (issues !== example.issues) q.set("issues", issues);
       var s = q.toString();
       history.replaceState(null, "", s ? "?" + s : location.pathname);
-      clearTimeout(timer);
-      if (valid) timer = setTimeout(function () { press(domain); }, 600);
+      if (valid) highlight(domain);
     }
   }
 
@@ -89,6 +94,7 @@
   if (params.has("readers")) readersInput.value = clamp(params.get("readers"), 1, 10000000, example.readers);
   if (params.has("issues")) issuesInput.value = clamp(params.get("issues"), 1, 60, example.issues);
   update(false);
+  shownDomain = cleanDomain(domainInput.value);
 
   [domainInput, readersInput, issuesInput].forEach(function (el) {
     el.addEventListener("input", function () { update(true); });
