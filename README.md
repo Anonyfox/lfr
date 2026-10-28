@@ -13,6 +13,8 @@ the terminal.** No admin UI, no per-subscriber bill.
 curl -fsSL https://lfr.email/install.sh | sudo sh
 ```
 
+![lfr setup on a fresh server, lfr domain add printing the ten DNS records for example.com, then a first mailbox](docs/media/demo.gif)
+
 On the server it goes to `/usr/local/bin`. Without sudo it installs to `~/.local/bin`, which is enough
 on a machine that only drives a server over ssh.
 
