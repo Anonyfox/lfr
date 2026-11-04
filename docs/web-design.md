@@ -19,7 +19,7 @@ note records why they look the way they do. The inputs were lfr's own: the craft
 ## What the inputs say
 
 - lfr means "looking for readers"; lfr.email dresses it as a dispatch form: grey-blue ground, typewriter
-  ink, postmark red, airmail blue (site/concept.md).
+  ink, postmark red, airmail blue (its concept).
 - Readers subscribe to hear from a person (V015) and want the substance in the mail, not a teaser
   (V017). A newsletter is a letter.
 - Readers who leave want one click, not a preferences maze (V001-V003); readers forget the

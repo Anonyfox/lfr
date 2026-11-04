@@ -52,7 +52,8 @@ file packages, engine (setup/serve only)`; `engine → everything`; domain packa
   `lfr rules` and `TestRuleCitations` pick it up.
 - **Skill text**: edit `internal/skills/files/<topic>/SKILL.md`; numbers and file names come from
   `project.Facts()` as `[[.Project.X]]`, never typed by hand. `TestSkillsMatchTheBinary` checks it.
-- **The website** is an lfm project in `site/` (`lfm compile`); `.github/workflows/pages.yml` deploys it.
+- **The website** [lfr.email](https://lfr.email) is built and hosted outside this repository; it serves the
+  root SKILL.md and install.sh byte for byte.
 
 ## Verify before you say done
 

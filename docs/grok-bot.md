@@ -149,8 +149,8 @@ Report the four results to the owner in one message.
    skills and the paused routines above. The ssh key stays on this Bot's computer, never in the template.
 2. Copy the link and give it to the owner. Do not post it anywhere.
 
-Then the owner adds the link to lfr: `"grokBot": "<link>"` under `urls` in site/lfm.json, a line in the
-site's agent box and footer, in site/assets/agents/llms.txt and in the README, as lfm does for its bot.
+Then the owner adds the link to the README and to lfr.email (its `grokBot` url, agent box, footer and
+llms.txt), as lfm does for its bot.
 
 ## 8. For the owner, optional: list lfr as a plugin
 

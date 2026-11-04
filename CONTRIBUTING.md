@@ -51,7 +51,6 @@ locally.
 
 ## The website
 
-`site/` is an [lfm](https://lfm.cash) project, deployed to GitHub Pages by the pages workflow on every
-change under `site/`. `lfm compile site` builds it, `lfm compile --release site` also checks it in a
-browser. `SKILL.md` and `install.sh` are served at the site root from `site/assets/agents/`, together
-with `llms.txt`; copy the root files there when they change (a test fails until they match).
+[lfr.email](https://lfr.email) is an [lfm](https://lfm.cash) project, built and hosted outside this
+repository. It serves the root `SKILL.md` and `install.sh` byte for byte, so changes to them reach it on its
+next deploy.
