@@ -102,7 +102,7 @@ func runServe(c *call) error {
 		return def
 	}
 	e, err := engine.Open(c.ctx, engine.Options{Data: c.data, SMTPAddr: addr("smtp", ":25"), HTTPAddr: addr("http", ":80"), HTTPSAddr: addr("https", ":443"),
-		Version: c.env.Build.Version, Log: log})
+		HTTPSProxyProtocol: c.has("https-proxy-protocol") && c.str("https-proxy-protocol") != "false", Version: c.env.Build.Version, Log: log})
 	if err != nil {
 		return err
 	}

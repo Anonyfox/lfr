@@ -171,3 +171,18 @@ and currently confirmed readers. Web labels are stored as `web: campaign-name`; 
 the existing referrer or `web` fallback applies. Resubscriptions update the member's consent record,
 so counts describe current records rather than a lifetime event total. Existing imported sources stay intact.
 The source column already exists in schema 1: no source schema change or migration is needed.
+
+## HTTPS behind HAProxy SNI passthrough
+
+For a local HAProxy forwarding TLS unchanged, start lfr with
+`lfr serve --https 127.0.0.1:8443 --https-proxy-protocol` and use `send-proxy-v2` on
+HAProxy's backend server line (for example `server lfr 127.0.0.1:8443 send-proxy-v2`).
+TLS still terminates in lfr; the binary PROXY v2 header precedes the TLS handshake.
+Keep port 80 routed to lfr for ACME, and preserve any other flags in your service override.
+
+The flag is off by default. When enabled, only transport peers exactly 127.0.0.1 or ::1
+are accepted; all other connections are closed. Every connection must carry v2, with
+TCP IPv4 or IPv6 addresses, or a LOCAL command (which retains the loopback peer).
+Header reads have a five-second deadline and a 65,535-byte payload ceiling.
+Rate limits, consent IPs and HTTP logs use the supplied source address. Trust every
+local process accordingly; do not enable this on a directly accessed HTTPS listener.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Opt-in `serve --https-proxy-protocol` accepts loopback-only PROXY v2 before TLS, so
+  HAProxy SNI passthrough preserves client IPs for rate limits and logs. Off by default.
+
 - List signup forms carry sanitized URL source labels; `lfr list stats <list>` reports signups
   and confirmed readers per source, including JSON. The existing source column needs no migration.
 

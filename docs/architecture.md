@@ -80,3 +80,8 @@ Each package tests itself; `engine_test.go` runs the whole server: real SMTP in,
 HTTP handlers, and a sink transport whose messages are verified with lfr's own DKIM, SPF and DMARC
 checks against a fake DNS zone built from `domain add`. `cli_test.go` drives the CLI against a live
 server. Parsers of untrusted input have fuzz targets.
+
+HTTPS optionally wraps its TCP listener with a loopback-only PROXY v2 reader before TLS
+(`serve --https-proxy-protocol`). It consumes one bounded header per connection in the HTTP
+connection goroutine and overrides RemoteAddr, so web limits and consent records share the real IP.
+The default listener continues to accept plain TLS without a PROXY header.

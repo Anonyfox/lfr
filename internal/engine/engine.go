@@ -54,12 +54,13 @@ const (
 
 // Options are process-level settings of `lfr serve`.
 type Options struct {
-	Data      string
-	SMTPAddr  string // ":25"
-	HTTPAddr  string // ":80"
-	HTTPSAddr string // ":443"
-	Version   string
-	Log       *slog.Logger
+	Data               string
+	SMTPAddr           string // ":25"
+	HTTPAddr           string // ":80"
+	HTTPSAddr          string // ":443"
+	HTTPSProxyProtocol bool   // require loopback PROXY v2 before TLS
+	Version            string
+	Log                *slog.Logger
 	// For tests and special setups.
 	DNS        dnsx.Resolver
 	Transport  outbound.Transport
@@ -398,6 +399,9 @@ func (e *Engine) Run(ctx context.Context) error {
 		run("http", func() error { return ignoreClosed(s.Serve(httpL)) })
 	}
 	if httpsL != nil {
+		if e.Opts.HTTPSProxyProtocol {
+			httpsL = proxyListener{httpsL}
+		}
 		s := newHTTP(e.Certs.Challenge(e.Web))
 		s.TLSConfig = tlsConf
 		run("https", func() error { return ignoreClosed(s.Serve(tls.NewListener(httpsL, tlsConf))) })

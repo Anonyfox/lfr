@@ -48,3 +48,5 @@ the skills after an upgrade. `lfr rules` and `lfr evidence` explain the checks a
 
 Use `lfr list stats <list>` (or `--json`) to compare signup sources and confirmed readers.
 Campaign links use `?source=campaign-name` on the list website.
+For local HAProxy SNI passthrough, `lfr serve --https 127.0.0.1:8443 --https-proxy-protocol`
+requires PROXY v2 from exact loopback peers; configure HAProxy's backend with `send-proxy-v2`.
