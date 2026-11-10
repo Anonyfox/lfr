@@ -1,14 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.2.7 (2026-11-10)
 
 - Opt-in `serve --https-proxy-protocol` accepts loopback-only PROXY v2 before TLS, so
   HAProxy SNI passthrough preserves client IPs for rate limits and logs. Off by default.
-
 - List signup forms carry sanitized URL source labels; `lfr list stats <list>` reports signups
   and confirmed readers per source, including JSON. The existing source column needs no migration.
-
-- Doctor treats operator pauses as warnings and health-limit pauses as failures, with the reason.
+- Doctor treats operator pauses as warnings and health-limit pauses as failures, with the reason. Migration 003 runs automatically on start and classifies existing pauses.
 
 ## 0.2.6 (2026-11-10)
 
