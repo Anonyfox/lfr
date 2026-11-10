@@ -198,8 +198,8 @@ func Run(ctx context.Context, env Env, args []string) int {
 	c := &call{ctx: ctx, env: env, cmd: cmd, flags: map[string][]string{}}
 	helpWanted, err := c.parse(rest)
 	if err != nil {
-		fmt.Fprintf(env.Stderr, "lfr %s: %v\nUsage: %s\n", cmd.path, err, synopsis(cmd))
-		return ExitUsage
+		c.json = jsonRequested(cmd, rest)
+		return c.exit(usage("%v", err))
 	}
 	if helpWanted {
 		printHelp(env.Stdout, cmd)
@@ -267,6 +267,28 @@ func (c *call) exit(err error) int {
 		json.NewEncoder(c.env.Stdout).Encode(out)
 	}
 	return exit
+}
+
+// jsonRequested finds the output flag even when parsing fails before reaching
+// it. Values of other flags and arguments after -- are not output flags.
+func jsonRequested(cmd *command, args []string) bool {
+	specs := append(append([]flag{}, cmd.flags...), globalFlags...)
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--" {
+			break
+		}
+		name, _, hasValue := strings.Cut(strings.TrimPrefix(args[i], "--"), "=")
+		if !strings.HasPrefix(args[i], "--") {
+			continue
+		}
+		if name == "json" {
+			return true
+		}
+		if spec, ok := lookupFlag(specs, name); ok && spec.value && !hasValue {
+			i++
+		}
+	}
+	return false
 }
 
 // parse reads flags anywhere among the arguments; "--" ends flags.
