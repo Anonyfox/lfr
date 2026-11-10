@@ -262,6 +262,7 @@ func (e *Engine) register() {
 		}
 		return l.TextValues(), nil
 	}))
+	h(api.OpListStats, op(func(ctx context.Context, a api.Name) (any, error) { return e.Lists.Stats(ctx, a.Name) }))
 	h(api.OpListShow, op(func(ctx context.Context, a api.Name) (any, error) { return e.Lists.Get(ctx, a.Name) }))
 	h(api.OpListSet, op(func(ctx context.Context, a api.ListSet) (any, error) {
 		in, err := listInput(a.ListFields)

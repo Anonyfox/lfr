@@ -173,6 +173,7 @@ type page struct {
 	ListName, HomeURL, FeedURL, ArchiveURL      string
 	ImprintURL, PrivacyURL                      string
 	SignupURL, FormToken, Consent, Cadence      string
+	Source                                      string
 	Headline, Pitch                             string // the front page's first line and lede
 	Issues                                      []issueItem
 	More                                        bool
@@ -268,6 +269,7 @@ func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, pre
 	case path == "/" || path == "":
 		ws, _ := s.Issues.List(ctx, l.ID, true, 11)
 		p := s.base(l)
+		p.Source = signupSource(r.URL.Query().Get("source"))
 		p.Title, p.Canonical, p.Home = l.Name, s.Renderer.ListURL(l)+"/", true
 		p.Issues = s.items(l, ws)
 		if len(p.Issues) > 10 {
@@ -277,6 +279,7 @@ func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, pre
 	case path == "/archive":
 		ws, _ := s.Issues.List(ctx, l.ID, true, 1000)
 		p := s.base(l)
+		p.Source = signupSource(r.URL.Query().Get("source"))
 		p.Title = l.Text("home.archive") + " · " + l.Name
 		p.Issues = s.items(l, ws)
 		s.render(w, l, "archive", 200, p)
@@ -302,6 +305,7 @@ func (s *Server) site(w http.ResponseWriter, r *http.Request, l *lists.List, pre
 			return
 		}
 		p := s.base(l)
+		p.Source = signupSource(r.URL.Query().Get("source"))
 		p.Title, p.Description, p.Canonical = wv.Subject+" · "+l.Name, wv.Summary, s.Renderer.IssueURL(l, wv)
 		item := s.items(l, []*issues.Issue{wv})[0]
 		item.Body = body
@@ -397,7 +401,7 @@ func (s *Server) subscribe(w http.ResponseWriter, r *http.Request, l *lists.List
 		return
 	}
 	src := "web"
-	if source = strings.TrimSpace(source); source != "" {
+	if source = signupSource(source); source != "" {
 		src = "web: " + trimTo(source, 100)
 	} else if ref := r.Header.Get("Referer"); ref != "" {
 		src = "web: " + trimTo(ref, 200)
@@ -798,4 +802,16 @@ func trimTo(s string, n int) string {
 		return s[:n]
 	}
 	return s
+}
+
+// signupSource keeps URL campaign labels small and safe for forms and reports.
+func signupSource(raw string) string {
+	var b strings.Builder
+	for i := 0; i < len(raw) && b.Len() < 32; i++ {
+		c := raw[i]
+		if c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' || c == '_' {
+			b.WriteByte(c)
+		}
+	}
+	return b.String()
 }

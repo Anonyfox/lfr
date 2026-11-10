@@ -931,3 +931,64 @@ func TestOpenRestoredBackup(t *testing.T) {
 		}
 	}
 }
+
+func TestSignupSources(t *testing.T) {
+	h := start(t)
+	h.call(t, api.OpDomainAdd, api.Name{Name: "example.com"}, nil)
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "news", ListFields: api.ListFields{Name: strPtr("News"), From: strPtr("news@example.com"), Host: strPtr("news.example.com")}}, nil)
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "other", ListFields: api.ListFields{Name: strPtr("Other"), From: strPtr("other@example.com")}}, nil)
+	for i, tc := range []struct{ raw, label, stored string }{
+		{"launch-1_a", "launch-1_a", "web: launch-1_a"},
+		{"A<script>!b_2", "scriptb_2", "web: scriptb_2"},
+		{strings.Repeat("x", 40), strings.Repeat("x", 32), "web: " + strings.Repeat("x", 32)},
+		{"", "", "web"},
+	} {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			for _, path := range []string{"/", "/archive"} {
+				r := h.web("GET", "https://news.example.com"+path+"?source="+url.QueryEscape(tc.raw), "")
+				if r.Code != 200 || !strings.Contains(r.Body.String(), `name="source" value="`+tc.label+`"`) {
+					t.Fatalf("form: %d %s", r.Code, r.Body.String())
+				}
+			}
+			email := fmt.Sprintf("source%d@mail.org", i)
+			r := h.web("POST", "https://news.example.com/subscribe", url.Values{"email": {email}, "source": {tc.raw}}.Encode())
+			if r.Code != 200 {
+				t.Fatalf("signup: %d %s", r.Code, r.Body.String())
+			}
+			h.sink.wait(t, email, 1)
+			var members []lists.Member
+			h.call(t, api.OpSubList, api.SubList{List: "news"}, &members)
+			found := false
+			for _, m := range members {
+				if m.Email == email {
+					found = true
+					if m.Source != tc.stored {
+						t.Fatalf("source %q", m.Source)
+					}
+				}
+			}
+			if !found {
+				t.Fatal("missing signup")
+			}
+			var stats []lists.SourceStats
+			h.call(t, api.OpListStats, api.Name{Name: "news"}, &stats)
+			found = false
+			for _, v := range stats {
+				if v.Source == tc.stored {
+					found = true
+					if v.Signups != 1 || v.Confirmed != 0 {
+						t.Fatalf("%+v", v)
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing source: %+v", stats)
+			}
+		})
+	}
+	var stats []lists.SourceStats
+	h.call(t, api.OpListStats, api.Name{Name: "other"}, &stats)
+	if len(stats) != 0 {
+		t.Fatalf("other list: %+v", stats)
+	}
+}

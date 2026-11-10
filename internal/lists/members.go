@@ -725,3 +725,33 @@ func (s *Service) SoftBounce(ctx context.Context, contactID int64, reason string
 func (s *Service) Engaged(ctx context.Context, contactID int64) {
 	s.DB.W.ExecContext(ctx, "UPDATE contacts SET soft_bounces = 0, first_soft = 0 WHERE id = ? AND soft_bounces > 0", contactID)
 }
+
+// SourceStats counts current membership records by their signup source.
+// Resubscriptions update the same consent record; these are not page views.
+type SourceStats struct {
+	Source    string `json:"source"`
+	Signups   int    `json:"signups"`
+	Confirmed int    `json:"confirmed"`
+}
+
+func (s *Service) Stats(ctx context.Context, slug string) ([]SourceStats, error) {
+	l, err := s.Get(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.DB.R.QueryContext(ctx, `SELECT source, count(*), count(*) FILTER (WHERE status = 'confirmed')
+ FROM members WHERE list_id = ? GROUP BY source ORDER BY source`, l.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []SourceStats{}
+	for rows.Next() {
+		var v SourceStats
+		if err := rows.Scan(&v.Source, &v.Signups, &v.Confirmed); err != nil {
+			return nil, err
+		}
+		out = append(out, v)
+	}
+	return out, rows.Err()
+}

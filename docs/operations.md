@@ -158,3 +158,16 @@ file before it changes anything; an empty value resets its key and keys the file
 they are. Keep the English `%s` placeholders in order and write a literal percent sign as `%%`. `date`
 is a Go layout such as `2-1-2006`; month names in a layout always print in English, so use digits for
 other languages.
+
+## Signup sources
+
+Link to a list page with `?source=campaign-name`. The signup form copies that label into
+a hidden `source` field without JavaScript; only `a-z`, `0-9`, `-` and `_` survive, at most
+32 characters. POSTed labels get the same sanitization. Custom signup templates can use
+`<input type="hidden" name="source" value="{{.Source}}">`.
+
+`lfr list stats <list>` (also `--json`) groups membership records by source and shows signups
+and currently confirmed readers. Web labels are stored as `web: campaign-name`; without a label,
+the existing referrer or `web` fallback applies. Resubscriptions update the member's consent record,
+so counts describe current records rather than a lifetime event total. Existing imported sources stay intact.
+The source column already exists in schema 1: no source schema change or migration is needed.

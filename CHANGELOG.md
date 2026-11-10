@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- List signup forms carry sanitized URL source labels; `lfr list stats <list>` reports signups
+  and confirmed readers per source, including JSON. The existing source column needs no migration.
+
 - Doctor treats operator pauses as warnings and health-limit pauses as failures, with the reason.
 
 ## 0.2.6 (2026-11-10)

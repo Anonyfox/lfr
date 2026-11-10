@@ -250,3 +250,21 @@ func runListText(c *call) error {
 		c.next("lfr list text %s", c.args[0])
 	})
 }
+
+func runListStats(c *call) error {
+	if err := exactly(c, 1); err != nil {
+		return err
+	}
+	var stats []lists.SourceStats
+	if err := c.do(api.OpListStats, api.Name{Name: c.args[0]}, &stats); err != nil {
+		return err
+	}
+	return c.result(stats, func() {
+		var rows [][]string
+		for _, v := range stats {
+			rows = append(rows, []string{v.Source, strconv.Itoa(v.Signups), strconv.Itoa(v.Confirmed)})
+		}
+		table(c.env.Stdout, []string{"source", "signups", "confirmed"}, rows)
+		c.next("lfr reader ls %s", c.args[0])
+	})
+}

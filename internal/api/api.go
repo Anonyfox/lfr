@@ -50,6 +50,7 @@ const (
 	OpListText    = "list.text"
 	OpListTextSet = "list.text.set"
 	OpListShow    = "list.show"
+	OpListStats   = "list.stats"
 	OpListSet     = "list.set"
 	OpListRemove  = "list.remove"
 	OpListPause   = "list.pause"
