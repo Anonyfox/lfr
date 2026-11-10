@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Doctor treats operator pauses as warnings and health-limit pauses as failures, with the reason.
+
 ## 0.2.6 (2026-11-10)
 
 - Flag parsing errors honor `--json` and print a structured error object instead of plain text.

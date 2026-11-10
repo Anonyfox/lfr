@@ -36,6 +36,7 @@ type List struct {
 	PrivacyURL   string    `json:"privacy_url,omitempty"`
 	Address      string    `json:"address,omitempty"`
 	Consent      string    `json:"consent,omitempty"`
+	PauseAuto    bool      `json:"pause_auto,omitempty"`
 	Paused       string    `json:"paused,omitempty"`
 	Cadence      string    `json:"cadence,omitempty"`  // how often mail comes, shown at signup
 	Headline     string    `json:"headline,omitempty"` // the website's first line; the name when empty
@@ -104,7 +105,7 @@ type Input struct {
 }
 
 const selectList = `SELECT l.id, l.domain_id, d.name, l.slug, l.name, l.description, l.from_local || '@' || d.name, l.from_name, l.reply_to, l.host,
-	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created,
+	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.pause_auto, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created,
 	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'confirmed'),
 	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'pending'),
 	(SELECT count(*) FROM members WHERE list_id = l.id AND status = 'unsubscribed'),
@@ -114,7 +115,7 @@ const selectList = `SELECT l.id, l.domain_id, d.name, l.slug, l.name, l.descript
 // selectListLight skips the member counts, for lookups on hot paths
 // (every web request, every recipient of an issue).
 const selectListLight = `SELECT l.id, l.domain_id, d.name, l.slug, l.name, l.description, l.from_local || '@' || d.name, l.from_name, l.reply_to, l.host,
-	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created, 0, 0, 0,
+	l.language, l.tracking, l.imprint_url, l.privacy_url, l.address, l.consent, l.paused, l.pause_auto, l.cadence, l.headline, l.pitch, l.old_hosts, l.min_gap, l.created, 0, 0, 0,
 	(SELECT json_group_object(key, value) FROM list_texts WHERE list_id = l.id)
 	FROM lists l JOIN domains d ON d.id = l.domain_id`
 
@@ -123,7 +124,7 @@ func scanList(row interface{ Scan(...any) error }) (*List, error) {
 	var created int64
 	var texts string
 	err := row.Scan(&l.ID, &l.DomainID, &l.Domain, &l.Slug, &l.Name, &l.Description, &l.From, &l.FromName, &l.ReplyTo, &l.Host,
-		&l.Language, &l.Tracking, &l.ImprintURL, &l.PrivacyURL, &l.Address, &l.Consent, &l.Paused, &l.Cadence, &l.Headline, &l.Pitch, &l.oldHosts, &l.MinGap, &created,
+		&l.Language, &l.Tracking, &l.ImprintURL, &l.PrivacyURL, &l.Address, &l.Consent, &l.Paused, &l.PauseAuto, &l.Cadence, &l.Headline, &l.Pitch, &l.oldHosts, &l.MinGap, &created,
 		&l.Confirmed, &l.Pending, &l.Unsubscribed, &texts)
 	if err == nil {
 		err = json.Unmarshal([]byte(texts), &l.Texts)
@@ -379,6 +380,10 @@ func (s *Service) Remove(ctx context.Context, slug string) error {
 
 // Pause stops sending for a list; an empty reason resumes it.
 func (s *Service) Pause(ctx context.Context, slug, reason string) (*List, error) {
+	return s.pause(ctx, slug, reason, false)
+}
+
+func (s *Service) pause(ctx context.Context, slug, reason string, automatic bool) (*List, error) {
 	l, err := s.Get(ctx, slug)
 	if err != nil {
 		return nil, err
@@ -389,7 +394,7 @@ func (s *Service) Pause(ctx context.Context, slug, reason string) (*List, error)
 	if reason == "" && l.Paused != "" {
 		resumed = s.Now().Unix()
 	}
-	if _, err := s.DB.W.ExecContext(ctx, "UPDATE lists SET paused = ?, resumed = max(resumed, ?) WHERE id = ?", reason, resumed, l.ID); err != nil {
+	if _, err := s.DB.W.ExecContext(ctx, "UPDATE lists SET paused = ?, pause_auto = ?, resumed = max(resumed, ?) WHERE id = ?", reason, automatic, resumed, l.ID); err != nil {
 		return nil, err
 	}
 	if reason != "" {
@@ -437,6 +442,6 @@ func (s *Service) CheckHealth(ctx context.Context, listID int64) (string, error)
 	if reason == "" {
 		return "", nil
 	}
-	_, err = s.Pause(ctx, l.Slug, reason)
+	_, err = s.pause(ctx, l.Slug, reason, true)
 	return reason, err
 }

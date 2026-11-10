@@ -212,7 +212,11 @@ func (e *Engine) Doctor(ctx context.Context) []api.Check {
 	if paused, _ := e.Lists.All(ctx); len(paused) > 0 {
 		for _, l := range paused {
 			if l.Paused != "" {
-				add(api.Check{Name: "list " + l.Slug, Status: "fail", Detail: "paused: " + l.Paused, Fix: "lfr list set " + l.Slug + " --resume"})
+				status := "warn"
+				if l.PauseAuto {
+					status = "fail"
+				}
+				add(api.Check{Name: "list " + l.Slug, Status: status, Detail: "paused: " + l.Paused, Fix: "lfr list set " + l.Slug + " --resume"})
 			}
 		}
 	}

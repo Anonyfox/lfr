@@ -373,6 +373,35 @@ func TestMailboxEndToEnd(t *testing.T) {
 	if len(checks) < 5 {
 		t.Fatalf("doctor %+v", checks)
 	}
+
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "paused", ListFields: api.ListFields{Name: strPtr("Paused"), From: strPtr("paused@example.com")}}, nil)
+	for _, tc := range []struct {
+		reason string
+		auto   bool
+		status string
+	}{
+		{"holiday", false, "warn"}, {"bounce rate 8%", true, "fail"},
+		{"complaint rate 1%", true, "fail"}, {"bounce rate reviewed by operator", false, "warn"},
+	} {
+		t.Run(tc.reason, func(t *testing.T) {
+			h.call(t, api.OpListPause, api.ListPause{Slug: "paused", Reason: tc.reason}, nil)
+			if tc.auto {
+				if _, err := h.e.DB.W.Exec("UPDATE lists SET pause_auto = 1 WHERE slug = 'paused'"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			h.call(t, api.OpDoctor, nil, &checks)
+			for _, c := range checks {
+				if c.Name == "list paused" {
+					if c.Status != tc.status || c.Detail != "paused: "+tc.reason {
+						t.Fatalf("%+v", c)
+					}
+					return
+				}
+			}
+			t.Fatal("missing pause finding")
+		})
+	}
 }
 
 func TestWatchStreamsEvents(t *testing.T) {

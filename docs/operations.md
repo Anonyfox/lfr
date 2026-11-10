@@ -85,6 +85,10 @@ Rate: `lfr config relay.rate 14` matches SES's default sending quota per second.
 5. Watch `lfr issue show` and `lfr events --kind complained --kind bounced`. A list pauses itself at
    0.3% complaints or 5% bounces; find the cause before `lfr list set <list> --resume`.
 
+An operator pause (`lfr list set <list> --pause "reason"`) is a doctor warning and does not
+change its exit code. Automatic bounce/complaint pauses remain failures. Both show the reason.
+Existing pause origins are classified automatically on upgrade; new pauses record the origin explicitly.
+
 ## Spam filtering
 
 New servers start with rules (authentication, blocklists, header and link anomalies, reputation).

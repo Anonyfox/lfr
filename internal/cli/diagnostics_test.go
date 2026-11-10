@@ -19,7 +19,7 @@ func TestDiagnosticOutputAndExitStatus(t *testing.T) {
 	for _, tc := range []struct {
 		name, status string
 		exit         int
-	}{{"healthy", "ok", 0}, {"failure", "fail", ExitFailure}} {
+	}{{"healthy", "ok", 0}, {"operator pause", "warn", 0}, {"failure", "fail", ExitFailure}} {
 		t.Run(tc.name, func(t *testing.T) {
 			dir := t.TempDir()
 			path := filepath.Join(dir, "lfr.sock")
@@ -64,6 +64,9 @@ func TestDiagnosticOutputAndExitStatus(t *testing.T) {
 					}
 					code, out, errs := run(t, env, "", args...)
 					expectedExit, want := tc.exit, "relay authentication"
+					if cmd == "relay" && tc.status == "warn" {
+						expectedExit = ExitFailure
+					}
 					if cmd == "relay" && machine {
 						expectedExit, want = 0, "relay.example"
 					}
@@ -79,7 +82,11 @@ func TestDiagnosticOutputAndExitStatus(t *testing.T) {
 				}
 			}
 			code, out, errs := run(t, env, "secret\n", "relay", "smtp://user@relay.example:2525", "--spf", "include:relay.example")
-			if code != tc.exit || !strings.Contains(out, "relay.example") {
+			relayExit := tc.exit
+			if tc.status == "warn" {
+				relayExit = ExitFailure
+			}
+			if code != relayExit || !strings.Contains(out, "relay.example") {
 				t.Fatalf("relay set: %d %s%s", code, out, errs)
 			}
 			code, out, errs = run(t, env, "", "reports")
