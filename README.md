@@ -6,8 +6,10 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/Anonyfox/lfr.svg)](https://pkg.go.dev/github.com/Anonyfox/lfr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**Your own mail server and newsletters in one Go binary on a $5 VPS, run by your coding agent from
-the terminal.** No admin UI, no per-subscriber bill.
+`lfr` is a self-hosted mail server and newsletter tool in one Go binary for people running custom
+domain mailboxes and Markdown newsletters through a terminal or coding agent. An idle server with
+one domain and one list used about 25 MB of memory in the measurement documented in
+[operations](docs/operations.md).
 
 ```sh
 curl -fsSL https://lfr.email/install.sh | sudo sh
@@ -18,10 +20,8 @@ curl -fsSL https://lfr.email/install.sh | sudo sh
 On the server it goes to `/usr/local/bin`. Without sudo it installs to `~/.local/bin`, which is enough
 on a machine that only drives a server over ssh.
 
-`lfr` runs mail for your domains from one binary on one small server: mailboxes, and newsletters with
-their websites. An agent operates it through a CLI, on the server or over ssh; there is no admin UI, no
-remote API and no monthly bill beyond the server (and a relay's cents per thousand mails where the
-provider blocks port 25).
+An agent operates lfr through its CLI, on the server or over ssh. It runs as one Go process with
+SQLite, without an admin UI or remote API.
 
 - **A mail server**: any `name@domain` in seconds, aliases, catch-alls, plus-addressing, forwarding,
   full-text search, replies, and a spam filter that learns from every message you move. DKIM (RSA and
@@ -37,8 +37,15 @@ provider blocks port 25).
   the agent skills rest on built-in research (`lfr evidence`): 136 reader and writer voices, 20
   newsletters and 144 standards, studies and benchmarks, quoted verbatim.
 
-Pure Go, SQLite, one process. About 25 MB of memory idle; comfortable on a 512 MB
-droplet with dozens of domains.
+## How it compares
+
+The [lfr.email comparison](https://lfr.email/#compare) covers hosting, storage and export access:
+
+- lfr runs Markdown newsletters, signup pages, archives and feeds on your own server; Substack
+  provides a hosted publishing network and paid subscriptions.
+- lfr has no per-subscriber software charge. You pay for your server, domain and any outbound relay.
+- Choose a hosted service if you want someone else to manage DNS, backups and sender reputation.
+- Choose a publishing platform if you need built-in paid memberships or a reader discovery network.
 
 ## Install
 
@@ -134,6 +141,34 @@ Readers sign up at `https://news.example.com/` (or any form that posts `email` t
 confirm by clicking a button, and leave with one click. Published issues live at
 `/issues/<slug>`. `lfr site bakers --eject site` copies the website templates into the project for editing and `lfr push` uploads them; `lfr rules`
 lists every check with the research behind it.
+
+## FAQ
+
+### Can I run a mail server and newsletters in one Go binary?
+
+lfr combines custom domain mailboxes, mailing lists and newsletter websites in one process with
+SQLite. The CLI manages mail, readers and Markdown issues locally or over ssh.
+
+### What server do I need to self-host lfr?
+
+The [operations guide](docs/operations.md) specifies a Linux server with a public IPv4 and says
+512 MB of memory is plenty. Open inbound ports 25, 80 and 443, and publish the DNS records printed
+by `lfr domain add`.
+
+### Can lfr send newsletters if my VPS blocks outbound port 25?
+
+Yes. Configure an SMTP relay: lfr builds and DKIM-signs messages, then hands them to the relay for
+the last hop. See [operations](docs/operations.md) for Amazon SES and SMTP2GO setup.
+
+### Does lfr support double opt-in and one-click unsubscribe?
+
+Yes, with stored consent proof, RFC 8058 one-click unsubscribe and unsubscribe by reply. It also
+handles bounces and complaints and pauses lists when their rates exceed its limits.
+
+### Can my coding agent manage lfr from my laptop?
+
+Yes. Set `LFR_REMOTE` as shown above to run commands over ssh; every command accepts `--json`.
+[SKILL.md](SKILL.md) is the agent entry point, and `lfr skills install` installs the process skills.
 
 ## Documentation
 
