@@ -277,6 +277,10 @@ func jsonRequested(cmd *command, args []string) bool {
 		if args[i] == "--" {
 			break
 		}
+		if args[i] == "-o" {
+			i++
+			continue
+		}
 		name, _, hasValue := strings.Cut(strings.TrimPrefix(args[i], "--"), "=")
 		if !strings.HasPrefix(args[i], "--") {
 			continue

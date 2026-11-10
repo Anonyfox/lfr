@@ -363,6 +363,11 @@ func TestMailboxEndToEnd(t *testing.T) {
 	if st.Domains != 1 || st.Mailboxes != 2 || len(st.Listening) == 0 {
 		t.Fatalf("status %+v", st)
 	}
+	// Keep doctor offline: a malformed configured relay is diagnosed without
+	// probing a public MX on port 25.
+	if err := h.e.Config.Set(context.Background(), "relay.url", "invalid://relay"); err != nil {
+		t.Fatal(err)
+	}
 	var checks []api.Check
 	h.call(t, api.OpDoctor, nil, &checks)
 	if len(checks) < 5 {

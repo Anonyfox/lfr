@@ -51,6 +51,7 @@ func TestFlagParserErrorsHonorJSONWithoutMistakingValues(t *testing.T) {
 	}{
 		{"output flag after error", []string{"list", "set", "news", "--tracking=perhaps", "--json"}, true},
 		{"leading output flag", []string{"--json", "mail", "ls", "--unknown"}, true},
+		{"output-looking short option value", []string{"mail", "read", "1", "-o", "--json", "--unknown"}, false},
 		{"output-looking value", []string{"mail", "send", "--subject", "--json", "--unknown"}, false},
 		{"literal after terminator", []string{"mail", "ls", "--unknown", "--", "--json"}, false},
 	} {

@@ -240,3 +240,40 @@ func FuzzCRLF(f *testing.F) {
 		stripForged(out, "mail.example.com")
 	})
 }
+
+func TestSessionResetDoesNotLeakEnvelopeAcrossTransactions(t *testing.T) {
+	e := start(t, false)
+	c, err := smtp.Dial(e.addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	if err := c.Hello("sender.example.org"); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Mail("abandoned@sender.example.org", nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Rcpt("abandoned@example.com", nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Reset(); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct{ from, to string }{{"first@sender.example.org", "first@example.com"}, {"second@sender.example.org", "second@example.com"}} {
+		if err := c.SendMail(tc.from, []string{tc.to}, strings.NewReader(body)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if len(e.got) != 2 {
+		t.Fatalf("delivered %d messages", len(e.got))
+	}
+	for i, want := range []string{"first", "second"} {
+		en := e.got[i]
+		if en.From != want+"@sender.example.org" || len(en.Rcpts) != 1 || en.Rcpts[0] != want+"@example.com" {
+			t.Fatalf("envelope leaked: %+v", en)
+		}
+	}
+}
