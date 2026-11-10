@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.6 (2026-11-10)
+
+- Flag parsing errors honor `--json` and print a structured error object instead of plain text.
+- Test coverage rises from 67% to 80% with offline tests of the CLI, mail server workflows, events,
+  configuration and content lifecycles; see [coverage](docs/coverage.md).
+- The README answers what lfr is, how it compares with hosted newsletter platforms, and common setup
+  questions.
+
 ## 0.2.5 (2026-10-25)
 
 - List sites serve `/sitemap.xml` with the front page, the archive and every published issue (with
