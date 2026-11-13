@@ -54,7 +54,12 @@ func TestSSHTransportReportsRemoteFailures(t *testing.T) {
 }
 
 func TestProxyCopiesBothDirectionsAndHonorsHalfClose(t *testing.T) {
-	dir := t.TempDir()
+	// macOS caps unix socket paths at 104 bytes; its t.TempDir paths run past that.
+	dir, err := os.MkdirTemp("/tmp", "lfrc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(dir) })
 	path := filepath.Join(dir, "socket")
 	listener, err := Listen(path, 0600)
 	if err != nil {

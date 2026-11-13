@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,7 +22,7 @@ func TestDiagnosticOutputAndExitStatus(t *testing.T) {
 		exit         int
 	}{{"healthy", "ok", 0}, {"operator pause", "warn", 0}, {"failure", "fail", ExitFailure}} {
 		t.Run(tc.name, func(t *testing.T) {
-			dir := t.TempDir()
+			dir := socketDir(t)
 			path := filepath.Join(dir, "lfr.sock")
 			listener, err := ctl.Listen(path, 0600)
 			if err != nil {
@@ -97,4 +98,16 @@ func TestDiagnosticOutputAndExitStatus(t *testing.T) {
 			}
 		})
 	}
+}
+
+// socketDir is a temporary directory short enough for a unix socket: macOS
+// caps socket paths at 104 bytes and its t.TempDir paths run past that.
+func socketDir(t *testing.T) string {
+	t.Helper()
+	dir, err := os.MkdirTemp("/tmp", "lfrs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(dir) })
+	return dir
 }

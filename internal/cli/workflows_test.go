@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -130,7 +131,12 @@ func TestBareCommandExplainsMachineState(t *testing.T) {
 	dir := t.TempDir()
 	env := map[string]string{"LFR_DATA": dir}
 	code, out, errs := run(t, env, "")
-	if code != 0 || !strings.Contains(out, "No lfr data") || !strings.Contains(out, "Next:") {
+	// Only Linux runs servers; elsewhere a fresh machine points at a remote one.
+	fresh := "No lfr data in " + dir
+	if runtime.GOOS != "linux" {
+		fresh = "No lfr server on this machine."
+	}
+	if code != 0 || !strings.Contains(out, fresh) || !strings.Contains(out, "Next:") {
 		t.Fatalf("fresh machine: %d %s%s", code, out, errs)
 	}
 	code, out, errs = run(t, env, "", "setup", "--hostname", "mail.example.com", "--ipv4", "203.0.113.7")
