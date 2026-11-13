@@ -20,6 +20,8 @@ mailbox too: readers' replies land there.
 
 - `lfr mail ls [mailbox] --unread`, `lfr mail read <id>` (marks it read; `--keep-unread` does not).
 - `lfr mail ls --search 'from:ann invoice'` searches subject, people and body.
+- A page holds 50 messages; a full page says so. Read further with `--limit <n>` (up to 1000) or
+  `--before <id>` using the last id shown.
 - `lfr events --follow --kind received --json` streams new mail as it arrives, one JSON object per line.
 
 ## Answering
