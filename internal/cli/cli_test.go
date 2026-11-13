@@ -203,6 +203,7 @@ func TestAgainstServer(t *testing.T) {
 		{"", []string{"issue", "send", "1", "--force"}, "status:", 0},
 		{"Hi there", []string{"mail", "send", "--from", "jo@example.com", "--to", "b@y.org", "--subject", "Hi", "--text", "-"}, "Queued for 1", 0},
 		{"", []string{"mail", "ls", "--folder", "sent"}, "Hi", 0},
+		{"", []string{"mail", "ls", "--folder", "sent", "--limit", "1"}, "Showing the first 1; more may exist", 0},
 		{"", []string{"mail", "read", "notanumber"}, "", 2},
 		{"", []string{"config", "relay.rate"}, "10", 0},
 		{"", []string{"config", "relay.rate", "zero"}, "", 2},
@@ -217,6 +218,9 @@ func TestAgainstServer(t *testing.T) {
 		if code != s.code || !strings.Contains(out+errs, s.want) {
 			t.Errorf("lfr %s: exit %d (want %d)\n%s%s", strings.Join(s.args, " "), code, s.code, out, errs)
 		}
+	}
+	if _, out, _ := run(t, env, "", "mail", "ls", "--folder", "sent"); strings.Contains(out, "more may exist") {
+		t.Errorf("mail ls under the page size must not hint at more rows:\n%s", out)
 	}
 	backupDir := filepath.Join(t.TempDir(), "backup")
 	if code, out, errs := run(t, env, "", "backup", backupDir, "--json"); code != 0 || !strings.Contains(out, backupDir) {

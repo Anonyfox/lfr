@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- `lfr mail ls` says when a page is full ("Showing the first 50; more may exist") and names the
+  `--limit` and `--before <id>` to use, instead of stopping at the page size silently. JSON output is unchanged.
+
 ## 0.2.7 (2026-11-10)
 
 - Opt-in `serve --https-proxy-protocol` accepts loopback-only PROXY v2 before TLS, so

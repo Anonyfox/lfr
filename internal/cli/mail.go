@@ -94,8 +94,19 @@ func runMailList(c *call) error {
 			return
 		}
 		printMessages(c, ms, q.Mailbox == "" || q.Search != "")
+		if limit := listLimit(q.Limit); len(ms) >= limit {
+			c.printf("\nShowing the first %d; more may exist. Use --limit <n> (up to 1000) or --before %d for the next page.\n", limit, ms[len(ms)-1].ID)
+		}
 		c.next("lfr mail read <id>")
 	})
+}
+
+// listLimit mirrors the server's page size for mail ls: 50 unless 1..1000.
+func listLimit(n int) int {
+	if n <= 0 || n > 1000 {
+		return 50
+	}
+	return n
 }
 
 func runMailRead(c *call) error {
