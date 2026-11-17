@@ -191,3 +191,18 @@ func TestCSVBlockUsesTheEmailColumnAndRotationStagesKeys(t *testing.T) {
 		t.Fatalf("headerless CSV: %d %s%s", code, out, errs)
 	}
 }
+
+func TestTooLongSocketPathNamesTheLimit(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("no unix socket path limit")
+	}
+	data := filepath.Join(t.TempDir(), strings.Repeat("d", 120))
+	code, out, errs := run(t, map[string]string{"LFR_DATA": data}, "", "status")
+	if code != ExitNotRunning || !strings.Contains(errs, "control socket path") || !strings.Contains(errs, "LFR_SOCKET") {
+		t.Fatalf("status: %d %s%s", code, out, errs)
+	}
+	code, out, _ = run(t, map[string]string{"LFR_DATA": data}, "", "status", "--json")
+	if code != ExitNotRunning || !strings.Contains(out, `"socket_path"`) {
+		t.Fatalf("status --json: %d %s", code, out)
+	}
+}

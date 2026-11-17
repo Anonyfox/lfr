@@ -231,10 +231,15 @@ func (c *call) exit(err error) int {
 	var ue usageError
 	var ce *ctl.Error
 	var se *silentErr
+	var pe *ctl.SocketPathError
 	code, msg, next, exit := "failed", "", "", ExitFailure
 	switch {
 	case errors.As(err, &se):
 		return ExitFailure // already reported, in JSON too
+	case errors.As(err, &pe):
+		code, msg, exit = "socket_path", pe.Error(), ExitNotRunning
+		next = "LFR_SOCKET=/tmp/lfr.sock, or a shorter --data/LFR_DATA"
+		fmt.Fprintf(c.env.Stderr, "lfr: %s\n", pe.Error())
 	case errors.As(err, &ue):
 		code, msg, exit = "usage", ue.msg, ExitUsage
 		next = "lfr help " + c.cmd.path

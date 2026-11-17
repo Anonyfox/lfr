@@ -87,7 +87,10 @@ func TestClientDialLongSocketPath(t *testing.T) {
 		conn.Close()
 		t.Fatal("unexpected connection")
 	}
-	if err == nil || err.Error() != checkSocketPath(path).Error() || errors.Is(err, ErrNotRunning) {
+	// The path error explains why no server can run there, and still counts as
+	// "not running" for flows that treat a missing server as a normal state.
+	var pe *SocketPathError
+	if err == nil || err.Error() != checkSocketPath(path).Error() || !errors.As(err, &pe) || pe.Path != path || !errors.Is(err, ErrNotRunning) {
 		t.Fatalf("dial = %v", err)
 	}
 	sentinel := errors.New("custom dial")
