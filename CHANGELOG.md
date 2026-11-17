@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- A control socket path longer than the system allows (103 bytes on macOS, 107 on Linux), for example
+  from a long `LFR_DATA`, now fails with the path, the limit and the fix (`LFR_SOCKET` or a shorter
+  data directory) in `lfr serve` and every client command, instead of `bind: invalid argument` or
+  "server is not running".
+
 ## 0.2.8 (2026-11-13)
 
 - `lfr mail ls` says when a page is full ("Showing the first 50; more may exist") and names the

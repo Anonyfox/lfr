@@ -13,7 +13,10 @@ import (
 )
 
 func TestCallAndStream(t *testing.T) {
-	dir, _ := os.MkdirTemp("", "lfr")
+	dir, err := os.MkdirTemp("/tmp", "lfr")
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer os.RemoveAll(dir)
 	path := filepath.Join(dir, "s")
 	s := &Server{Log: slog.New(slog.NewTextHandler(io.Discard, nil)), Classify: func(error) string { return CodeConflict }}

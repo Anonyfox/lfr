@@ -102,6 +102,9 @@ func (s *Server) Ops() []string {
 
 // Listen opens the socket at path with the given permissions, replacing a stale one.
 func Listen(path string, mode os.FileMode) (net.Listener, error) {
+	if err := checkSocketPath(path); err != nil {
+		return nil, err
+	}
 	if c, err := net.DialTimeout("unix", path, time.Second); err == nil {
 		c.Close()
 		return nil, fmt.Errorf("another lfr server is running on %s", path)
@@ -232,6 +235,9 @@ var ErrNotRunning = errors.New("lfr server is not running")
 func (c Client) dial(ctx context.Context) (net.Conn, error) {
 	if c.Dial != nil {
 		return c.Dial(ctx)
+	}
+	if err := checkSocketPath(c.Path); err != nil {
+		return nil, err
 	}
 	d := net.Dialer{Timeout: 3 * time.Second}
 	conn, err := d.DialContext(ctx, "unix", c.Path)
