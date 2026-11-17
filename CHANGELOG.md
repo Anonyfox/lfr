@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.9 (2026-11-17)
 
 - A control socket path longer than the system allows (103 bytes on macOS, 107 on Linux), for example
   from a long `LFR_DATA`, now fails with the path, the limit and the fix (`LFR_SOCKET` or a shorter
