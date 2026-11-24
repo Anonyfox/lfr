@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.10 (2026-11-24)
 
 - Double opt-in confirmation mail now sets the same one-click `List-Unsubscribe` and
   `List-Unsubscribe-Post` headers as issue sends, so a mistaken signup can be cancelled
