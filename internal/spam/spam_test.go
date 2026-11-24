@@ -203,3 +203,52 @@ func TestOwnDomainForgery(t *testing.T) {
 		t.Errorf("forged own-domain mail scored %.2f (%v)", v.P, v.Hits)
 	}
 }
+
+func TestTrainingAuthenticatedSpam(t *testing.T) {
+	c := newClassifier(t)
+	ctx := context.Background()
+	in := goodInput(parsed("ann@friend.org", "Meeting", "See you tomorrow.", ""))
+	in.DNSBL = []string{"bl.spamcop.net"}
+	sample, err := json.Marshal(c.Classify(ctx, in).Sample)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 80 {
+		if err := c.Train(ctx, in.Parsed, string(sample), "spam", ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Score unlisted mail from a fresh sender, domain and network to isolate authentication.
+	fresh := goodInput(parsed("jo@other.org", "Meeting", "See you tomorrow.", ""))
+	fresh.Auth.FromDomain = "other.org"
+	fresh.Auth.SPFDomain = "other.org"
+	fresh.Auth.DKIM[0].Domain = "other.org"
+	fresh.IP = net.ParseIP("192.0.2.10")
+	v := c.Classify(ctx, fresh)
+	w := c.Weights(ctx)
+	for _, k := range []string{"spf_pass", "dkim_aligned", "dmarc_pass"} {
+		if v.Sample.X[k] != 1 || w[k] > 0 || v.Contrib[k] > 0 {
+			t.Errorf("%s feature %g, weight %g, contribution %g", k, v.Sample.X[k], w[k], v.Contrib[k])
+		}
+	}
+	if v.P >= 0.6 {
+		t.Errorf("authenticated mail scored %.3f: %v", v.P, v.Hits)
+	}
+}
+
+func TestLoadFlippedAuthWeights(t *testing.T) {
+	c := newClassifier(t)
+	ctx := context.Background()
+	if err := c.DB.SetSetting(ctx, "spam.weights", `{"spf_pass":1.03,"dkim_aligned":0.5,"dmarc_pass":0.37,"spf_fail":3}`); err != nil {
+		t.Fatal(err)
+	}
+	w := c.Weights(ctx)
+	for _, k := range []string{"spf_pass", "dkim_aligned", "dmarc_pass"} {
+		if w[k] != 0 {
+			t.Errorf("loaded %s weight %g, want 0", k, w[k])
+		}
+	}
+	if w["spf_fail"] != 3 {
+		t.Errorf("loaded spf_fail weight %g, want 3", w["spf_fail"])
+	}
+}

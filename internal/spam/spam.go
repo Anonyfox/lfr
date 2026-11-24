@@ -85,6 +85,15 @@ type Classifier struct {
 	weights map[string]float64
 }
 
+// Authentication success can lose its ham credit but cannot add spam evidence.
+func constrainWeight(k string, v float64) float64 {
+	switch k {
+	case "spf_pass", "dmarc_pass", "dkim_aligned":
+		return min(v, 0)
+	}
+	return v
+}
+
 func (c *Classifier) loadWeights(ctx context.Context) map[string]float64 {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -100,7 +109,8 @@ func (c *Classifier) loadWeights(ctx context.Context) map[string]float64 {
 		if json.Unmarshal([]byte(s), &stored) == nil {
 			for k, v := range stored {
 				if _, known := Prior[k]; known && !math.IsNaN(v) && !math.IsInf(v, 0) {
-					w[k] = v
+					// Correct older models before scoring. The next weight update persists the correction.
+					w[k] = constrainWeight(k, v)
 				}
 			}
 		}
@@ -427,7 +437,7 @@ func (c *Classifier) learnWeights(ctx context.Context, x map[string]float64, spa
 	grad := y - sigmoid(logit)
 	update := func(k string, v float64) {
 		nw := w[k] + rate*grad*v - pull*(w[k]-Prior[k])
-		w[k] = min(max(nw, Prior[k]-6), Prior[k]+6)
+		w[k] = constrainWeight(k, min(max(nw, Prior[k]-6), Prior[k]+6))
 	}
 	update("bias", 1)
 	for k, v := range x {
