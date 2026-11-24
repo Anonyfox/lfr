@@ -433,12 +433,20 @@ func (e *Engine) buildConfirm(ctx context.Context, r outbound.Row) ([]byte, erro
 	if l.Address != "" {
 		text += "\n" + l.Address
 	}
+	unsubTok := e.Tokens.Make(token.Unsub, m.ID, 0)
+	unsubURL := e.BaseURL(l) + "/u/" + unsubTok
+	unsubMail := "unsub+" + unsubTok + "@" + l.Domain
 	return msg.Compose(msg.Draft{
 		From: msg.Address{Name: l.FromName, Email: l.From}, To: []msg.Address{{Email: m.Email}},
 		Subject: fmt.Sprintf(l.Text("confirm.subject"), l.Name), Date: e.Opts.Now(),
 		MessageID: e.Tokens.Make(token.Message, r.ID) + ".c@" + l.Domain,
 		Text:      text, HTML: html,
-		Header: [][2]string{{"Auto-Submitted", "auto-generated"}, {"Form-Sub", formSub(m.SignupIP)}},
+		Header: [][2]string{
+			{"Auto-Submitted", "auto-generated"},
+			{"Form-Sub", formSub(m.SignupIP)},
+			{"List-Unsubscribe", "<" + unsubURL + ">, <mailto:" + unsubMail + "?subject=unsubscribe>"},
+			{"List-Unsubscribe-Post", "List-Unsubscribe=One-Click"},
+		},
 	})
 }
 

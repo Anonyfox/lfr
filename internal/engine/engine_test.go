@@ -188,6 +188,46 @@ func (h *harness) smtpSend(from string, to []string, data string) error {
 
 var linkRE = regexp.MustCompile(`https://[^\s"<>]+/confirm/[A-Za-z0-9_-]+`)
 
+func TestConfirmMailOneClickUnsubscribe(t *testing.T) {
+	h := start(t)
+	var dom api.DomainInfo
+	h.call(t, api.OpDomainAdd, api.Name{Name: "example.com"}, &dom)
+	h.publish(t, dom)
+	name, host := "Bakers Weekly", "news.example.com"
+	var l lists.List
+	h.call(t, api.OpListAdd, api.ListSet{Slug: "bakers", ListFields: api.ListFields{Name: &name, From: strPtr("news@example.com"), Host: &host}}, &l)
+
+	r := h.web("POST", "https://news.example.com/subscribe", url.Values{"email": {"Mistake@Mail.org"}}.Encode())
+	if r.Code != 200 {
+		t.Fatalf("signup %d %s", r.Code, r.Body.String())
+	}
+	confirm := h.sink.wait(t, "mistake@mail.org", 1)[0]
+	p := msg.Parse(confirm.raw)
+	if p.Header.Get("List-Unsubscribe-Post") != "List-Unsubscribe=One-Click" ||
+		!strings.Contains(p.Header.Get("List-Unsubscribe"), "https://news.example.com/u/") ||
+		!strings.Contains(p.Header.Get("List-Unsubscribe"), "mailto:unsub+") {
+		t.Fatalf("confirmation headers:\n%s", confirm.raw)
+	}
+	unsub := strings.Trim(strings.Split(p.Header.Get("List-Unsubscribe"), ",")[0], "<> ")
+	if rec := h.web("POST", unsub, "List-Unsubscribe=One-Click"); rec.Code != 200 {
+		t.Fatalf("one-click %d %s", rec.Code, rec.Body.String())
+	}
+	var members []lists.Member
+	h.call(t, api.OpSubList, api.SubList{List: "bakers"}, &members)
+	found := false
+	for _, m := range members {
+		if m.Email == "mistake@mail.org" {
+			found = true
+			if m.Status != "unsubscribed" {
+				t.Fatalf("status %q", m.Status)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("missing signup")
+	}
+}
+
 func TestNewsletterEndToEnd(t *testing.T) {
 	h := start(t)
 	ctx := context.Background()

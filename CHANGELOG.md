@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Double opt-in confirmation mail now sets the same one-click `List-Unsubscribe` and
+  `List-Unsubscribe-Post` headers as issue sends, so a mistaken signup can be cancelled
+  without waiting for the pending membership to expire.
+
 ## 0.2.9 (2026-11-17)
 
 - A control socket path longer than the system allows (103 bytes on macOS, 107 on Linux), for example
