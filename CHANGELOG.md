@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.11 (2026-11-25)
+
+- Spam training can no longer turn passing SPF, DKIM alignment or DMARC into spam evidence. Their
+  learned weights are capped at 0 on load and after every update, so a model that already drifted
+  positive is corrected before the next score.
+
 ## 0.2.10 (2026-11-24)
 
 - Double opt-in confirmation mail now sets the same one-click `List-Unsubscribe` and
